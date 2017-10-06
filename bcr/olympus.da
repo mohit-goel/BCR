@@ -1,0 +1,10 @@
+class Olympus(process):
+    def setup(total_pings:int): pass
+
+    def run():
+        a = False
+        await(len(listof(p, received(('Ping',), from_=p))) == total_pings)
+
+    def receive(msg=('Ping',), from_=p):
+        output("Pinged")
+        send(('Pong',), to=p)
