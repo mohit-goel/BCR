@@ -10,14 +10,38 @@ class State(Enum):
 		
 class MESSAGE(Enum):
 		INITHIST = "initHist"
+		CONFIGURATION_REQUEST = "configuration_request"
+		CONFIGURATION_RESPONSE = "configuration_response"
+		CLIENT_DONE ="client_done"
 
 
 class Client(process):
-	def setup(olympus:Olympus):
+	def setup(olympus:Olympus,clientNumber:int):
 		self.q = []
+		self.head = None
+		self.tail=None
+		self.replicas = None
+		self.upTime = logical_clock()
 	
 	def run():
-		output("Ponged.")
+		c = logical_clock()
+		send((MESSAGE.CONFIGURATION_REQUEST.value,clientNumber), to=olympus)
+		output('Client %i asking for configuration from  Olympus'%(clientNumber,), sep = str_exp, level = log_level)
+		await(some(received((MESSAGE.CONFIGURATION_RESPONSE.value , _, _, _, c2)), has = c2 >=c))
+		
+		
+		send((MESSAGE.CLIENT_DONE.value,self,clientNumber), to=olympus)
+		
+		
+		
+		
+	
+	def receive(msg= (MESSAGE.CONFIGURATION_RESPONSE.value,replicas,head,tail,c),from_=p):
+		output('Client %i received %s from olympus'%(clientNumber,MESSAGE.CONFIGURATION_RESPONSE.value), sep = str_exp, level = log_level)
+		self.head = head
+		self.tail = tail
+		self.replicas = replicas
+		
 
 
 class Olympus(process):
@@ -40,6 +64,20 @@ class Olympus(process):
 		for i in range(nReplicas):
 			send((MESSAGE.INITHIST.value,running_State,replicas,head,tail,i,c), to=replicas[i])
 			output("Message %s sent to replica %i" % (MESSAGE.INITHIST.value,i,), sep = str_exp, level = log_level)
+			
+		await(each(client in clients, has= some(received((MESSAGE.CLIENT_DONE.value, _client,_)))))
+		
+		output('Olympus process is getting closed', sep = str_exp, level = log_level)
+		
+			
+	def receive(msg= (MESSAGE.CONFIGURATION_REQUEST.value,clientNumber),from_=p):
+		output('Olympus received %s from client %i' %(MESSAGE.CONFIGURATION_REQUEST.value,clientNumber), sep = str_exp, level = log_level)
+		send((MESSAGE.CONFIGURATION_RESPONSE.value,replicas,head,tail,logical_clock()), to=p)
+		
+	def receive(msg= (MESSAGE.CLIENT_DONE.value,client,clientNumber),from_=p):
+		output('Olympus received done from client %i' %(clientNumber,), sep = str_exp, level = log_level)
+		
+	
 		
 class Replica(process):
 
@@ -86,19 +124,21 @@ class Replica(process):
 	 	
 	 		
 	 	
-	 	
 def main():
-	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
-	nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 3
+	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+	nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 2
 	config(clock='Lamport')
 	
 	
 	clients = new(Client,num=nclients)
-	
+	clients = list(clients)
 	
 	olympus = new(Olympus,num= 1)
-	setup(clients,(olympus,))
+	for i in range(nclients):
+		setup(clients[i],(olympus,i))
+	
 	setup(olympus, (nReplicas,clients))
 	start(olympus)
+	start(clients)
 
 	
