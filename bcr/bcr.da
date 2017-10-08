@@ -1,22 +1,104 @@
+import sys
+config(channel is fifo, clock is lamport)
+from enum import Enum
+str_exp = ','
+log_level =20
+class State(Enum):
+		PENDING=0
+		IMMUTABLE=1
+		ACTIVE =2
+		
+class MESSAGE(Enum):
+		INITHIST = "initHist"
 
-class BCR(process):
+
+class Client(process):
+	def setup(olympus:Olympus):
+		self.q = []
 	
+	def run():
+		output("Ponged.")
 
 
+class Olympus(process):
+	
+	def setup(nReplicas:int,clients:Client):
+		self.head = None
+		self.tail = None
+		self.replicas = []
+	
+	def run():
+		output('Starting Olympus', sep = str_exp, level = log_level)
+		replicas = new(Replica,num=nReplicas)
+		replicas = list(replicas)
+		self.head = replicas[0]
+		self.tail = replicas[nReplicas-1]
+		running_State = dict()
+		setup(replicas,(self,State.PENDING))
+		start(replicas)
+		c = logical_clock()
+		for i in range(nReplicas):
+			send((MESSAGE.INITHIST.value,running_State,replicas,head,tail,i,c), to=replicas[i])
+			output("Message %s sent to replica %i" % (MESSAGE.INITHIST.value,i,), sep = str_exp, level = log_level)
+		
+class Replica(process):
 
-
-
-
-
-
-
+	def setup(olympus:Olympus,state:State):
+		self.isHead = False
+		self.isTail = False
+		self.prevReplica = None
+		self.nextReplica = None
+		self.runningState = dict()
+		self.head = None
+		self.upTime = logical_clock()
+		self.state = state
+		self.replicaChain = None
+	
+	def run():
+		output('Starting Replica', sep = str_exp, level = log_level)
+		-- yieldInitHist
+		await(some(received((MESSAGE.INITHIST.value , _, _, _, _, _, c2)), has = upTime >=c2))
+		
+	def receive(msg= (MESSAGE.INITHIST.value,running_State,replicas,head,tail,index,c),from_=p,at=(yieldInitHist,)):
+		output('replica %i received %s from olympus'%(index,MESSAGE.INITHIST.value), sep = str_exp, level = log_level)
+		self.head = head
+		runningState = running_State
+		self.replicaChain = replicas
+	 	
+		if(index == 0):
+			isHead = True
+			nextReplica = replicaChain[index+1]
+			output("Replica %i is head" % (index,), sep = str_exp, level = log_level)
+	 		
+		elif(index == len(replicaChain)-1):
+			isTail =True
+			prevReplica = replicaChain[index-1]
+			output("Replica %i is tail" % (index,), sep = str_exp, level = log_level)
+		else:
+			prevReplica = replicaChain[index-1]
+			nextReplica = replicaChain[index+1]
+		state = State.ACTIVE
+	 	
+	 		
+	 		
+	 		
+	 		
+	 	
+	 		
+	 	
+	 	
 def main():
-    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
-    nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 3
-    config(clock='Lamport')
-    pong = new(Olympus,nReplicas, num= 1)
-    ping = new(Ping, num= npings)
-    setup(ping, (pong, nrounds))
-    start(pong)
-    start(ping)
+	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+	nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 3
+	config(clock='Lamport')
+	
+	
+	clients = new(Client,num=nclients)
+	
+	
+	olympus = new(Olympus,num= 1)
+	setup(clients,(olympus,))
+	setup(olympus, (nReplicas,clients))
+	start(olympus)
+
 	
