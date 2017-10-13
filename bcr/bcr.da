@@ -8,13 +8,6 @@ class State(Enum):
 		IMMUTABLE=1
 		ACTIVE =2
 		
-class MESSAGE(Enum):
-		INITHIST = "initHist"
-		CONFIGURATION_REQUEST = "configuration_request"
-		CONFIGURATION_RESPONSE = "configuration_response"
-		CLIENT_DONE ="client_done"
-
-
 class Client(process):
 	def setup(olympus:Olympus,clientNumber:int):
 		self.q = []
@@ -22,22 +15,42 @@ class Client(process):
 		self.tail=None
 		self.replicas = None
 		self.upTime = logical_clock()
+		self.count = 0
 	
 	def run():
 		c = logical_clock()
-		send((MESSAGE.CONFIGURATION_REQUEST.value,clientNumber), to=olympus)
+		send(('configuration_request',clientNumber), to=olympus)
 		output('Client %i asking for configuration from  Olympus'%(clientNumber,), sep = str_exp, level = log_level)
-		await(some(received((MESSAGE.CONFIGURATION_RESPONSE.value , _, _, _, c2)), has = c2 >=c))
+		await(some(received(('configuration_response' , _, _, _, c2),from_=olympus), has = c2 >=c))
+		
+		key = 'movie'
+		value = 'star'
+		count = count+1
+		c = logical_clock()
+		send(('client_operation_request','put',key,value,self,count,c,clientNumber),to=head)
+		output('Client %i sent request to head'%(clientNumber,), sep = str_exp, level = log_level)
 		
 		
-		send((MESSAGE.CLIENT_DONE.value,self,clientNumber), to=olympus)
+		if await(some(received(('client_operation_response', 'put',result, c2,_tail)), has = c2 >=c)):
+			output('Client %i received result %s from tail'%(clientNumber,result), sep = str_exp, level = log_level)
+        
+		elif timeout(120):
+			output('Client %i timeout'%(clientNumber,), sep = str_exp, level = log_level)
+
 		
 		
+		send(('done',self,clientNumber), to=parent())
+		await(received(('done',), from_=parent()))
+		output('client received done from master')
+		output('client sending done to olympus')
+		send(('done',self,clientNumber), to=olympus)
 		
 		
-	
-	def receive(msg= (MESSAGE.CONFIGURATION_RESPONSE.value,replicas,head,tail,c),from_=p):
-		output('Client %i received %s from olympus'%(clientNumber,MESSAGE.CONFIGURATION_RESPONSE.value), sep = str_exp, level = log_level)
+		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
+		
+		
+	def receive(msg= ('configuration_response',replicas,head,tail,c),from_=_olympus):
+		output('Client %i received configuration_response from olympus'%(clientNumber,), sep = str_exp, level = log_level)
 		self.head = head
 		self.tail = tail
 		self.replicas = replicas
@@ -62,20 +75,27 @@ class Olympus(process):
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):
-			send((MESSAGE.INITHIST.value,running_State,replicas,head,tail,i,c), to=replicas[i])
-			output("Message %s sent to replica %i" % (MESSAGE.INITHIST.value,i,), sep = str_exp, level = log_level)
+			send(('inithist',running_State,replicas,head,tail,i,c), to=replicas[i])
+			output("Message inithist sent to replica %i" % (i,), sep = str_exp, level = log_level)
 			
-		await(each(client in clients, has= some(received((MESSAGE.CLIENT_DONE.value, _client,_)))))
+		
+			
+		await(each(client in clients, has= some(received(('done', _client,_)))))
+		output('olympus received done from all clients')
+		output('olympus sending  done to all replicas')
+		send(('done',), to=replicas)
+		await(each(replica in replicas, has= some(received(('done',_replica)))))
+		output('olympus received  done from all replicas')
+		send(('done',), to=parent())
 		
 		output('Olympus process is getting closed', sep = str_exp, level = log_level)
 		
 			
-	def receive(msg= (MESSAGE.CONFIGURATION_REQUEST.value,clientNumber),from_=p):
-		output('Olympus received %s from client %i' %(MESSAGE.CONFIGURATION_REQUEST.value,clientNumber), sep = str_exp, level = log_level)
-		send((MESSAGE.CONFIGURATION_RESPONSE.value,replicas,head,tail,logical_clock()), to=p)
-		
-	def receive(msg= (MESSAGE.CLIENT_DONE.value,client,clientNumber),from_=p):
-		output('Olympus received done from client %i' %(clientNumber,), sep = str_exp, level = log_level)
+	def receive(msg= ('configuration_request',clientNumber),from_=p):
+		output('Olympus received configuration_request from client %i' %(clientNumber,), sep = str_exp, level = log_level)
+		await(each(replica in replicas, has= some(received(('inithist_response', _replica)))))
+		output('Olympus sending configuration response to client %i' %(clientNumber,), sep = str_exp, level = log_level)
+		send(('configuration_response',replicas,head,tail,logical_clock()), to=p)
 		
 	
 		
@@ -86,22 +106,69 @@ class Replica(process):
 		self.isTail = False
 		self.prevReplica = None
 		self.nextReplica = None
-		self.runningState = dict()
+		self.runningState = None
 		self.head = None
 		self.upTime = logical_clock()
 		self.state = state
 		self.replicaChain = None
+		self.operationDict = dict()
+		self.resultDict = dict()
+		self.slot = -1
+		self.index = -1
+	
+	def actionsAtEveryReplica(operationName,key,value,operationId,client):
+		result = None
+		
+		if(operationName == 'put'):
+			runningState[key] = value
+			resultDict[(operationId,client)] = 'OK'
+			
+		output('state after action %s'%(runningState,), sep = str_exp, level = log_level)
+			
+		
+		
 	
 	def run():
 		output('Starting Replica', sep = str_exp, level = log_level)
 		-- yieldInitHist
-		await(some(received((MESSAGE.INITHIST.value , _, _, _, _, _, c2)), has = upTime >=c2))
+		await(some(received(('inithist' , _, _, _, _, _, c2),from_=olympus)))
 		
-	def receive(msg= (MESSAGE.INITHIST.value,running_State,replicas,head,tail,index,c),from_=p,at=(yieldInitHist,)):
-		output('replica %i received %s from olympus'%(index,MESSAGE.INITHIST.value), sep = str_exp, level = log_level)
+		await(received(('done',), from_=olympus))
+		output('replica received  done from olympus')
+		send(('done',self), to=olympus)
+		output('replica send  done to olympus')
+		
+		
+		
+	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
+		
+		output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
+		
+		if(isHead):
+			slot = slot +1
+		
+		actionsAtEveryReplica(operationName,key,value,operationId,client)
+			
+		send(('forward_shuttle',operationName,key,value,client,operationId,slot),to = nextReplica)
+		
+		
+		
+	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot),from_=_prevReplica):
+		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
+		actionsAtEveryReplica(operationName,key,value,operationId,client)
+		
+		if(isTail):
+			response = resultDict[(operationId,client)]
+			send(('client_operation_response',operationName,response,logical_clock(),self),to = client)
+		else:
+			send(('forward_shuttle',operationName,key,value,client,operationId,slot),to = nextReplica)
+		
+	def receive(msg= ('inithist',running_State,replicas,head,tail,index,c),from_=_olympus,at=(yieldInitHist,)):
+		
 		self.head = head
 		runningState = running_State
 		self.replicaChain = replicas
+		self.index = index
 	 	
 		if(index == 0):
 			isHead = True
@@ -116,13 +183,9 @@ class Replica(process):
 			prevReplica = replicaChain[index-1]
 			nextReplica = replicaChain[index+1]
 		state = State.ACTIVE
-	 	
-	 		
-	 		
-	 		
-	 		
-	 	
-	 		
+		output('replica %i received inithist from olympus'%(index,), sep = str_exp, level = log_level)
+		send(('inithist_response',self),to = olympus)
+		
 	 	
 def main():
 	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 2
@@ -140,5 +203,17 @@ def main():
 	setup(olympus, (nReplicas,clients))
 	start(olympus)
 	start(clients)
+	
+	await(each(client in clients, has= some(received(('done', _client,_)))))
+	output('master receiveded done from all clients', sep = str_exp, level = log_level)
+	send(('done',), to=clients)
+	output('master acknowledge done to clients')
+	output('master waiting  done from  olympus')
+	#await(received(('done',), from_=olympus))
+	
+	await(some(received(('done',), from_=olympus)))
+	output('master received  done from  olympus')
+	
+	
 
 	
