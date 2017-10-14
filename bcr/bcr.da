@@ -6,13 +6,15 @@ import nacl.signing
 from OrderProof  import OrderProof
 from OrderStatement import OrderStatement
 from Crypto import Crypto
-
+from State import  State
+from Validations import  Validations
+from ResultProof import ResultProof
+from ResultStatement import ResultStatement
+from Shuttle import Shuttle
+import pickle
 str_exp = ','
 log_level =20
-class State(Enum):
-		PENDING=0
-		IMMUTABLE=1
-		ACTIVE =2
+
 		
 class Client(process):
 
@@ -141,8 +143,12 @@ class Replica(process):
 		self.replicaPrivate = None
 		self.replicaPublic = None
 	
-	def actionsAtEveryReplica(operationName,key,value,operationId,client):
+	def actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle):
 		result = None
+		orderStatement = OrderStatement(slot,operationName,operationId)
+		orderProof = shuttle.getOrderProof()
+		listOfOrderProofs = orderProof.getlistOfOrderSt()
+		listOfOrderProofs.append(orderStatement)
 		
 		if(operationName == 'put'):
 			runningState[key] = value
@@ -166,58 +172,62 @@ class Replica(process):
 		
 		
 	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
+		validations =  Validations()
+		if validations.shouldReplicaAcceptRequest(self.state):
+			output('replica accepted request')
 		
-		output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
-		orderProof = None
-		if(isHead):
-			slot = slot +1
-			orderProof = [slot,operationName,operationId,[]]
-			
-		orderSt = ",".join([str(slot),operationName,str(operationId)])
-		signedOrderStatement = replicaPrivate.sign(orderSt.encode())
-		orderProof[3].append(signedOrderStatement)
+			output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
 	
-		
-		actionsAtEveryReplica(operationName,key,value,operationId,client)
+			orderProof = None
+			resultProof = None
+			shuttle = None
+			if(isHead):
+				slot = slot +1
+				orderProof = OrderProof([],slot,operationName,operationId)
+				resultProof = ResultProof([],operationName,operationId)
+				shuttle =  Shuttle(resultProof,orderProof)
+				
+			actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
 			
-		send(('forward_shuttle',operationName,key,value,client,operationId,slot,orderProof),to = nextReplica)
+			send(('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = nextReplica)
+		else:
+			output('replica not accepted request')
 		
 		
 		
-	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,orderProof),from_=_prevReplica):
+	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),from_=_prevReplica):
 		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
-		actionsAtEveryReplica(operationName,key,value,operationId,client)
 		
-		output('order proof is :%s'%(str(orderProof),),sep = str_exp, level = log_level)
-		
+		actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
+			
 		if(isTail):
 			response = resultDict[(operationId,client)]
 			send(('client_operation_response',operationName,response,logical_clock(),self),to = client)
 		else:
 			send(('forward_shuttle',operationName,key,value,client,operationId,slot),to = nextReplica)
 		
+	
 	def receive(msg= ('inithist',running_State,replicas,head,tail,index,c),from_=_olympus,at=(yieldInitHist,)):
 		
 		self.head = head
-		runningState = running_State
+		self.runningState = running_State
 		self.replicaChain = replicas
 		self.index = index
 		self.replicaPrivate = replicaPrivateList[index]
-	 	#self.replicaPublic = replicaPublicList[index]
-		
+		self.replicaPublic = replicaPublicList[index]
 		if(index == 0):
-			isHead = True
-			nextReplica = replicaChain[index+1]
+			self.isHead = True
+			self.nextReplica = replicaChain[index+1]
 			output("Replica %i is head" % (index,), sep = str_exp, level = log_level)
 	 		
 		elif(index == len(replicaChain)-1):
-			isTail =True
-			prevReplica = replicaChain[index-1]
+			self.isTail =True
+			self.prevReplica = replicaChain[index-1]
 			output("Replica %i is tail" % (index,), sep = str_exp, level = log_level)
 		else:
-			prevReplica = replicaChain[index-1]
-			nextReplica = replicaChain[index+1]
-		state = State.ACTIVE
+			self.prevReplica = replicaChain[index-1]
+			self.nextReplica = replicaChain[index+1]
+		self.state = State.ACTIVE
 		output('replica %i received inithist from olympus'%(index,), sep = str_exp, level = log_level)
 		send(('inithist_response',self),to = olympus)
 		
@@ -242,6 +252,10 @@ def main():
 		(private,public)= crypto.getSignedKey()
 		replicaPrivate.append(private)
 		replicaPublic.append(public)
+	output('replica private keys')
+	output(' %s'%(replicaPrivate,))
+	output('replica public keys')
+	output(' %s'%(replicaPublic,))
 		
 		
 		
