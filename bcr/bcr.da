@@ -1,6 +1,12 @@
 import sys
 config(channel is fifo, clock is lamport)
 from enum import Enum
+import nacl.encoding
+import nacl.signing
+from OrderProof  import OrderProof
+from OrderStatement import OrderStatement
+from Crypto import Crypto
+
 str_exp = ','
 log_level =20
 class State(Enum):
@@ -9,13 +15,18 @@ class State(Enum):
 		ACTIVE =2
 		
 class Client(process):
-	def setup(olympus:Olympus,clientNumber:int):
+
+
+	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list):
 		self.q = []
 		self.head = None
 		self.tail=None
 		self.replicas = None
 		self.upTime = logical_clock()
 		self.count = 0
+		self.signedKey = signedKey
+		self.olympusPublic = olympusPublic
+		self.replicaPublic= replicaPublic
 	
 	def run():
 		c = logical_clock()
@@ -58,11 +69,19 @@ class Client(process):
 
 
 class Olympus(process):
+
 	
-	def setup(nReplicas:int,clients:Client):
+	def setup(nReplicas:int,clients:Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list):
 		self.head = None
 		self.tail = None
 		self.replicas = []
+		self.olympusPrivate =olympusPrivate
+		self.olympusPublic = olympusPublic
+		self.clientPublic = clientPublic
+		self.replicaPublic = replicaPublic
+		self.replicaPrivate = replicaPrivate
+		
+		
 	
 	def run():
 		output('Starting Olympus', sep = str_exp, level = log_level)
@@ -71,7 +90,7 @@ class Olympus(process):
 		self.head = replicas[0]
 		self.tail = replicas[nReplicas-1]
 		running_State = dict()
-		setup(replicas,(self,State.PENDING))
+		setup(replicas,(self,State.PENDING,olympusPublic,clientPublic,replicaPublic,replicaPrivate))
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):
@@ -101,7 +120,7 @@ class Olympus(process):
 		
 class Replica(process):
 
-	def setup(olympus:Olympus,state:State):
+	def setup(olympus:Olympus,state:State,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list):
 		self.isHead = False
 		self.isTail = False
 		self.prevReplica = None
@@ -115,6 +134,12 @@ class Replica(process):
 		self.resultDict = dict()
 		self.slot = -1
 		self.index = -1
+		self.olympusPublic = olympusPublic
+		self.clientPublic = clientPublic
+		self.replicaPublicList = replicaPublic
+		self.replicaPrivateList = replicaPrivate
+		self.replicaPrivate = None
+		self.replicaPublic = None
 	
 	def actionsAtEveryReplica(operationName,key,value,operationId,client):
 		result = None
@@ -143,19 +168,27 @@ class Replica(process):
 	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
 		
 		output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
-		
+		orderProof = None
 		if(isHead):
 			slot = slot +1
+			orderProof = [slot,operationName,operationId,[]]
+			
+		orderSt = ",".join([str(slot),operationName,str(operationId)])
+		signedOrderStatement = replicaPrivate.sign(orderSt.encode())
+		orderProof[3].append(signedOrderStatement)
+	
 		
 		actionsAtEveryReplica(operationName,key,value,operationId,client)
 			
-		send(('forward_shuttle',operationName,key,value,client,operationId,slot),to = nextReplica)
+		send(('forward_shuttle',operationName,key,value,client,operationId,slot,orderProof),to = nextReplica)
 		
 		
 		
-	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot),from_=_prevReplica):
+	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,orderProof),from_=_prevReplica):
 		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
 		actionsAtEveryReplica(operationName,key,value,operationId,client)
+		
+		output('order proof is :%s'%(str(orderProof),),sep = str_exp, level = log_level)
 		
 		if(isTail):
 			response = resultDict[(operationId,client)]
@@ -169,7 +202,9 @@ class Replica(process):
 		runningState = running_State
 		self.replicaChain = replicas
 		self.index = index
-	 	
+		self.replicaPrivate = replicaPrivateList[index]
+	 	#self.replicaPublic = replicaPublicList[index]
+		
 		if(index == 0):
 			isHead = True
 			nextReplica = replicaChain[index+1]
@@ -191,16 +226,34 @@ def main():
 	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 	nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 2
 	config(clock='Lamport')
+	crypto = Crypto()
+	(olympusPrivate,olympusPublic) = crypto.getSignedKey()
+	clientPrivate = []
+	clientPublic = []
+	replicaPrivate = []
+	replicaPublic = []
 	
+	for i in range(nclients):
+		(private,public)= crypto.getSignedKey()
+		clientPrivate.append(private)
+		clientPublic.append(public)
+		
+	for i in range(nReplicas):
+		(private,public)= crypto.getSignedKey()
+		replicaPrivate.append(private)
+		replicaPublic.append(public)
+		
+		
+		
 	
 	clients = new(Client,num=nclients)
 	clients = list(clients)
 	
 	olympus = new(Olympus,num= 1)
 	for i in range(nclients):
-		setup(clients[i],(olympus,i))
+		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic))
 	
-	setup(olympus, (nReplicas,clients))
+	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate))
 	start(olympus)
 	start(clients)
 	
