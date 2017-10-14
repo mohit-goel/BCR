@@ -8,11 +8,15 @@ class ResultProof:
     def getlistOfResultSt(self):
         return self.listOfResultSt
     
+    def addStatement(self,st):
+        self.listOfResultSt.append(st)
+        
+    
     def setlistOfOrderSt(self,listOfResultSt):
         self.listOfResultSt = listOfResultSt
         
     def __str__(self):
-     return listOfResultSt + "," + str(operationName) + "," + str(operationId)
+     return self.listOfResultSt + "," + str(self.operationName) + "," + str(self.operationId)
         
         
      

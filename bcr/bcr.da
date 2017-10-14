@@ -11,6 +11,7 @@ from Validations import  Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
 from Shuttle import Shuttle
+from ReplicaHistory import ReplicaHistory
 import pickle
 str_exp = ','
 log_level =20
@@ -44,7 +45,7 @@ class Client(process):
 		output('Client %i sent request to head'%(clientNumber,), sep = str_exp, level = log_level)
 		
 		
-		if await(some(received(('client_operation_response', 'put',result, c2,_tail)), has = c2 >=c)):
+		if await(some(received(('client_operation_response', 'put',operationId,result,resultProof,c2,_tail)), has = c2 >=c)):   #operationId = _
 			output('Client %i received result %s from tail'%(clientNumber,result), sep = str_exp, level = log_level)
         
 		elif timeout(120):
@@ -133,7 +134,7 @@ class Replica(process):
 		self.state = state
 		self.replicaChain = None
 		self.operationDict = dict()
-		self.resultDict = dict()
+		self.resultDict = dict()    #operation to result mapping
 		self.slot = -1
 		self.index = -1
 		self.olympusPublic = olympusPublic
@@ -142,19 +143,27 @@ class Replica(process):
 		self.replicaPrivateList = replicaPrivate
 		self.replicaPrivate = None
 		self.replicaPublic = None
+		self.validations =  Validations()
+		self.replicaHistory = ReplicaHistory()
 	
 	def actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle):
+		
 		result = None
 		orderStatement = OrderStatement(slot,operationName,operationId)
-		orderProof = shuttle.getOrderProof()
-		listOfOrderProofs = orderProof.getlistOfOrderSt()
-		listOfOrderProofs.append(orderStatement)
+		shuttle.addOrderStatement(orderStatement)
 		
+		result =None
 		if(operationName == 'put'):
 			runningState[key] = value
-			resultDict[(operationId,client)] = 'OK'
+			result = 'OK'
+			resultDict[(operationId,client)] = result
+		
+		resultStatement = ResultStatement(result,operationName,operationId)
+		shuttle.addResultStatement(resultStatement)
+		
+		replicaHistory.insertOperation((operationName,operationId,client),result,slot)
 			
-		output('state after action %s'%(runningState,), sep = str_exp, level = log_level)
+		output('Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
 			
 		
 		
@@ -172,7 +181,7 @@ class Replica(process):
 		
 		
 	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
-		validations =  Validations()
+		
 		if validations.shouldReplicaAcceptRequest(self.state):
 			output('replica accepted request')
 		
@@ -202,9 +211,10 @@ class Replica(process):
 			
 		if(isTail):
 			response = resultDict[(operationId,client)]
-			send(('client_operation_response',operationName,response,logical_clock(),self),to = client)
+			send(('client_operation_response',operationName,operationId,response,shuttle.getResultProof,logical_clock(),self),to = client)
+			
 		else:
-			send(('forward_shuttle',operationName,key,value,client,operationId,slot),to = nextReplica)
+			send(('forward_shuttle',operationName,operationId,key,value,client,slot),to = nextReplica)
 		
 	
 	def receive(msg= ('inithist',running_State,replicas,head,tail,index,c),from_=_olympus,at=(yieldInitHist,)):
@@ -257,9 +267,6 @@ def main():
 	output('replica public keys')
 	output(' %s'%(replicaPublic,))
 		
-		
-		
-	
 	clients = new(Client,num=nclients)
 	clients = list(clients)
 	

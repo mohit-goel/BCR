@@ -9,11 +9,14 @@ class OrderProof:
     def getlistOfOrderSt(self):
         return self.listOfOrderSt
     
+    def addStatement(self,st):
+        self.listOfOrderSt.append(st)
+    
     def setlistOfOrderSt(self,listOfOrderSt):
         self.listOfOrderSt = listOfOrderSt
         
     def __str__(self):
-     return listOfOrderSt + "," + str(slot) + "," + str(operationName) + "," + str(operationId)
+     return self.listOfOrderSt + "," + str(self.slot) + "," + str(self.operationName) + "," + str(self.operationId)
         
         
      

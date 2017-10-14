@@ -1,7 +1,7 @@
 
 class ResultStatement:
     
-    def __init__(self,operationName,operationId,result):
+    def __init__(self,result,operationName,operationId):
         self.result = result
         self.operationName = operationName
         self.operationId = operationId
