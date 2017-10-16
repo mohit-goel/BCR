@@ -11,7 +11,7 @@ class ResultStatement:
         return self.result
     
     def __str__(self):
-     return str(self.result) + "," + str(self.operationName) + "," + str(self.operationId)
+     return '[' + str(self.result) + "," + str(self.operationName) + "," + str(self.operationId) + "]"
         
     
     

@@ -16,7 +16,7 @@ class OrderProof:
         self.listOfOrderSt = listOfOrderSt
         
     def __str__(self):
-     return self.listOfOrderSt + "," + str(self.slot) + "," + str(self.operationName) + "," + str(self.operationId)
+     return '{ ' + ",".join(str(i) for i in self.listOfOrderSt)  + ",slot: " + str(self.slot) + ",operation:(" + str(self.operationName) + "," + str(self.operationId) + ')}'
         
         
      

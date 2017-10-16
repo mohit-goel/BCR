@@ -1,0 +1,187 @@
+import sys
+config(channel is fifo, clock is lamport)
+from enum import Enum
+import nacl.encoding
+import nacl.signing
+from OrderProof  import OrderProof
+from OrderStatement import OrderStatement
+from Crypto import Crypto
+from State import  State
+from Validations import  Validations
+from ResultProof import ResultProof
+from ResultStatement import ResultStatement
+from Shuttle import Shuttle
+from ReplicaHistory import ReplicaHistory
+import pickle
+str_exp = ','
+log_level =20
+cl = import_da('client')	
+ol = import_da('olympus')
+
+class Replica(process):
+
+	def setup(olympus:ol.Olympus,state:State,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list):
+		self.isHead = False
+		self.isTail = False
+		self.prevReplica = None
+		self.nextReplica = None
+		self.runningState = None
+		self.head = None
+		self.upTime = logical_clock()
+		self.state = state
+		self.replicaChain = None
+		self.operationDict = dict()
+		self.resultDict = dict()    #operation to result mapping
+		self.slot = -1
+		self.index = -1
+		self.olympusPublic = olympusPublic
+		self.clientPublic = clientPublic
+		self.replicaPublicList = replicaPublic
+		self.replicaPrivateList = replicaPrivate
+		self.replicaPrivate = None
+		self.replicaPublic = None
+		self.validations =  Validations()
+		self.replicaHistory = ReplicaHistory()
+	
+	def actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle):
+		
+		result = None
+		orderStatement = OrderStatement(slot,operationName,operationId)
+		shuttle.addOrderStatement(orderStatement)
+		
+		result =None
+		if(operationName == 'put'):
+			runningState[key] = value
+			result = 'OK'
+			resultDict[(operationId,client)] = result
+		
+		resultStatement = ResultStatement(result,operationName,operationId)
+		shuttle.addResultStatement(resultStatement)
+		
+		replicaHistory.insertOperation((operationName,operationId,client),result,slot)
+			
+		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
+			
+		
+		
+	
+	def run():
+		output('Starting Replica', sep = str_exp, level = log_level)
+		-- yieldInitHist
+		await(some(received(('inithist' , _, _, _, _, _, c2),from_=olympus)))
+		
+		await(received(('done',), from_=olympus))
+		output('replica received  done from olympus')
+		send(('done',self), to=olympus)
+		output('replica send  done to olympus')
+	
+	def generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber):
+		(state,shuttle) = replicaHistory.getResultShuttleForOperation((operationName,operationId,client))
+		response = resultDict[(operationId,client)]
+		output('result shuttle received :%s'%(shuttle.getResultProof()))
+		send(('client_retransmitted_response',operationName,operationId,response,shuttle.getResultProof(),logical_clock(),self),to = client)
+		
+	def awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber):
+		if await(replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client))):
+			output('Replica:%i received backward shuttle waiting client:%s retransmitted request'%(index,client), sep = str_exp, level = log_level)
+			generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
+							
+		elif timeout(120):
+			output('Replica:%i timeout out waiting for backward shuttle client:%s'%(index,client), sep = str_exp, level = log_level)
+			send(('reconfiguration_request',index),to = olympus)
+		
+	def receive(msg= ('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber)):
+		
+		if validations.shouldReplicaAcceptRequest(self.state):
+		
+			output('Replica %i received retransmitted request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
+			if replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client)):
+				generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
+				
+			
+			elif isHead:
+				if replicaHistory.isOperationExist((operationName,operationId,client)):
+					awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber)
+						
+				else:
+					send(('client_operation_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=head)
+					
+					
+			else:
+				send(('client_retransmitted_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=head)
+				awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber)
+					
+					
+	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
+		if validations.shouldReplicaAcceptRequest(self.state):
+		
+			output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
+	
+			orderProof = None
+			resultProof = None
+			shuttle = None
+			if(isHead):
+				slot = slot +1
+				orderProof = OrderProof([],slot,operationName,operationId)
+				resultProof = ResultProof([],operationName,operationId)
+				shuttle =  Shuttle(resultProof,orderProof)
+				
+			actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
+			
+			send(('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = nextReplica)
+		else:
+			output('replica not accepted request')
+		
+		
+		
+	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),from_=_prevReplica):
+		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
+		
+		actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
+			
+		if(isTail):
+			response = resultDict[(operationId,client)]
+			send(('client_operation_response',operationName,operationId,response,shuttle.getResultProof(),logical_clock(),self),to = client)
+			send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = prevReplica)
+			
+		else:
+			send(('forward_shuttle',operationName,operationId,key,value,client,slot),to = nextReplica)
+			
+	def receive(msg= ('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),from_=_nextReplica):
+		output('Replica %i received backward shuttle'%(index,), sep = str_exp, level = log_level)
+		
+		replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
+		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
+		
+			
+		if(head):
+			output('backward shuttle reached head')
+			
+		else:
+			send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = prevReplica)
+		
+	
+	def receive(msg= ('inithist',running_State,replicas,head,tail,index,c),from_=_olympus,at=(yieldInitHist,)):
+		
+		self.head = head
+		self.runningState = running_State
+		self.replicaChain = replicas
+		self.index = index
+		self.replicaPrivate = replicaPrivateList[index]
+		self.replicaPublic = replicaPublicList[index]
+		if(index == 0):
+			self.isHead = True
+			self.nextReplica = replicaChain[index+1]
+			output("Replica %i is head" % (index,), sep = str_exp, level = log_level)
+	 		
+		elif(index == len(replicaChain)-1):
+			self.isTail =True
+			self.prevReplica = replicaChain[index-1]
+			output("Replica %i is tail" % (index,), sep = str_exp, level = log_level)
+		else:
+			self.prevReplica = replicaChain[index-1]
+			self.nextReplica = replicaChain[index+1]
+		self.state = State.ACTIVE
+		output('replica %i received inithist from olympus'%(index,), sep = str_exp, level = log_level)
+		send(('inithist_response',self),to = olympus)
+		

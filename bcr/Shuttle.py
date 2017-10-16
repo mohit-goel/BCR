@@ -18,7 +18,7 @@ class Shuttle:
         self.resultProof.addStatement(resultStatement)
         
     def __str__(self):
-     return str(self.resultProof) + "," + str(self.orderProof)
+     return 'resultProof:' + str(self.resultProof) + "\n orderProof:" + str(self.orderProof)
         
         
         

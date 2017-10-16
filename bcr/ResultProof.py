@@ -16,7 +16,7 @@ class ResultProof:
         self.listOfResultSt = listOfResultSt
         
     def __str__(self):
-     return self.listOfResultSt + "," + str(self.operationName) + "," + str(self.operationId)
+     return '{' + ",".join(str(i)+";" for i in self.listOfResultSt) + "operation:(" + str(self.operationName) + "," + str(self.operationId) + ')}'
         
         
      

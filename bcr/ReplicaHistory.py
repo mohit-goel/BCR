@@ -62,12 +62,18 @@ class ReplicaHistory:
         
     def __str__(self):
         res = []
+        res.append('\n')
         res.append("operationStateDict=")
+        
         for k,v in self.operationStateDict.items():
-            res.append(str(k) + "=" + str(v) )    
-        res.append("slotOperationDict=")   
+            res.append(str(k) + "=" + str(v) ) 
+            res.append('\n')
+        res.append('\n') 
+        res.append("slotOperationDict=")
+        
         for k,v in self.slotOperationDict.items():
-            res.append(str(k) + "=" + str(v) )    
+            res.append(str(k) + "=" + str(v) )
+            res.append('\n')     
      
         return ",".join(res)
  
