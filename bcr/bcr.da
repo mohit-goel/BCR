@@ -13,6 +13,7 @@ from ResultStatement import ResultStatement
 from Shuttle import Shuttle
 from ReplicaHistory import ReplicaHistory
 import pickle
+from configread import configread
 str_exp = ','
 log_level =20
 cl = import_da('client')	
@@ -21,8 +22,12 @@ ol = import_da('olympus')
 
 
 def main():
-	nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 2
-	nReplicas = int(sys.argv[2]) if len(sys.argv) > 1 else 2
+	if len(sys.argv) > 1:
+		config = configread(sys.argv[1])
+		output('configuration parameters are read from file')
+	nclients = config.num_client
+	nReplicas = 2
+	#nReplicas = 2*(config.failure_num) + 1
 	config(clock='Lamport')
 	crypto = Crypto()
 	(olympusPrivate,olympusPublic) = crypto.getSignedKey()
@@ -50,7 +55,7 @@ def main():
 	
 	olympus = new(ol.Olympus,num= 1)
 	for i in range(nclients):
-		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic))
+		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i]))
 	
 	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate))
 	start(olympus)

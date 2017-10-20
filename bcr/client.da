@@ -18,7 +18,7 @@ log_level =20
 class Client(process):
 
 
-	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list):
+	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list):
 		self.q = []
 		self.head = None
 		self.tail=None
@@ -28,6 +28,7 @@ class Client(process):
 		self.signedKey = signedKey
 		self.olympusPublic = olympusPublic
 		self.replicaPublic= replicaPublic
+		self.workload = workload
 	
 	def run():
 		c = logical_clock()
@@ -35,12 +36,12 @@ class Client(process):
 		output('Client %i asking for configuration from  Olympus'%(clientNumber,), sep = str_exp, level = log_level)
 		await(some(received(('configuration_response' , _, _, _, c2),from_=olympus), has = c2 >=c))
 		
-		while operationId < 2:
-			key = 'movie:'+str(operationId)+str(clientNumber)
-			value = 'star:'+str(operationId)+str(clientNumber)
+		for load in self.workload:
+			key = load.key
+			value = load.value
+			operationName = load.action
 			operationId = operationId+1
 			c = logical_clock()
-			operationName = 'put'
 			send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
 			output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
 			if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)))):
@@ -48,7 +49,7 @@ class Client(process):
 				output('Client:%i received result:%s resultproof:%s from tail'%(clientNumber,result,resultProof), sep = str_exp, level = log_level)
 				continue
                 
-			elif timeout(4):
+			elif timeout(120):
 				output("Failed to receive the response in time, sending request to all replicas")
 				send(('client_retransmitted_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
 				

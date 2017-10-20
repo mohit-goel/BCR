@@ -51,8 +51,25 @@ class Replica(process):
 		
 		result =None
 		if(operationName == 'put'):
-			runningState[key] = value
+			runningState[key] = [value]
 			result = 'OK'
+			resultDict[(operationId,client)] = result
+		elif(operationName == 'get'):
+			result = ""
+			if key in runningState.keys():
+				result = runningState[key]
+			resultDict[(operationId,client)] = result
+		elif(operationName == 'append'):
+			result = 'OK'
+			if key in runningState.keys():
+				runningState[key].append(value)
+			else:
+				result = 'fail'
+			resultDict[(operationId,client)] = result
+		elif(operationName == 'slice'):
+			result = 'OK'
+			if key in runningState.keys():
+				result = runningState[key]
 			resultDict[(operationId,client)] = result
 		
 		resultStatement = ResultStatement(result,operationName,operationId)
