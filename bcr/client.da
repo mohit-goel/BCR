@@ -47,6 +47,7 @@ class Client(process):
 			operationName = load.action
 			operationId = operationId+1
 			c = logical_clock()
+
 			send(('getconfiguration',clientNumber), to=olympus)
 			if await(isConfigurationValid):
 				isValidResponse = False
@@ -54,7 +55,6 @@ class Client(process):
 				output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
 				#if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)), has = c2 < c)):
 				if await(isValidResponse):
-					
 					continue
                 
 

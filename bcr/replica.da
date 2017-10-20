@@ -67,9 +67,17 @@ class Replica(process):
 				result = 'fail'
 			resultDict[(operationId,client)] = result
 		elif(operationName == 'slice'):
-			result = 'OK'
+			result = 'fail'
 			if key in runningState.keys():
-				result = runningState[key]
+				value = re.split(":",value)
+				x = int(value[0])
+				range = int(value[1])
+				klength = len(runningState[key])
+				if (x < klength):
+					modif = runningState[key]
+					modif = modif[x:min(range,(klength-1))]
+					runningState[key] = modif
+					result = 'OK'
 			resultDict[(operationId,client)] = result
 		
 		resultStatement = ResultStatement(result,operationName,operationId)

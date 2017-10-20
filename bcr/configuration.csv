@@ -19,7 +19,7 @@ nonhead_timeout = 3000
 # CLIENT WORKLOAD
 workload[0] = put('movie','star'); append('movie','buffs')
 workload[1] = put('movie','stars'); get('movie'); append ( 'movie', ' lovers ' )
-workload[2] = put('jedi,'luke skywalker); put('jedis','0:4')
+workload[2] = put('jedi,'luke skywalker); slice('jedis','0:4')
 
 # FAILURE SCENARIO
 # failures(c,r) is the failure scenario for replica r in configuration c.
