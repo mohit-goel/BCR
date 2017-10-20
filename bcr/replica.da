@@ -93,39 +93,44 @@ class Replica(process):
 		output('replica send  done to olympus')
 	
 	def generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber):
-		(state,shuttle) = replicaHistory.getResultShuttleForOperation((operationName,operationId,client))
+		(status,shuttle) = replicaHistory.getResultShuttleForOperation((operationName,operationId,client))
 		response = resultDict[(operationId,client)]
-		output('result shuttle received :%s'%(shuttle.getResultProof()))
 		send(('client_retransmitted_response',operationName,operationId,response,shuttle.getResultProof(),logical_clock(),self),to = client)
+		output('Replica:%i sent client_retransmitted_response to client:%s'%(index,client))	
 		
 	def awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber):
 		if await(replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client))):
-			output('Replica:%i received backward shuttle waiting client:%s retransmitted request'%(index,client), sep = str_exp, level = log_level)
 			generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 							
 		elif timeout(120):
 			output('Replica:%i timeout out waiting for backward shuttle client:%s'%(index,client), sep = str_exp, level = log_level)
 			send(('reconfiguration_request',index),to = olympus)
 		
-	def receive(msg= ('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber)):
+	def receive(msg= ('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber),from_=sender):
+		output('Replica %i received retransmitted request from process:%s client:%s '%(index,sender,client), sep = str_exp, level = log_level)
+		re = validations.shouldReplicaAcceptRequest(state)
+		if re:
 		
-		if validations.shouldReplicaAcceptRequest(self.state):
-		
-			output('Replica %i received retransmitted request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
+			
 			if replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client)):
+				output('Replica:%i has result shuttle '%(index,))	
 				generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 				
 			
-			elif isHead:
+			if isHead:
+				output('Replica:%i doesnot have result shuttle'%(index))	
 				if replicaHistory.isOperationExist((operationName,operationId,client)):
+					output('Replica:%i has already seen the operaation'%(index))
 					awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 						
 				else:
-					send(('client_operation_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=head)
+					output('Replica:%i has not already seen the operation:%s.Initiating the protocol from scratch'%(index))
+					send(('client_operation_request',operationName,key,value,client,operationId,logical_clock(),clientNumber),to=head)
 					
 					
 			else:
-				send(('client_retransmitted_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=head)
+				output('Replica:%i is not head. Sending the retransmitted request to head:%s'%(index,head))	
+				send(('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber),to=head)
 				awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 					
 					
@@ -159,6 +164,7 @@ class Replica(process):
 		if(isTail):
 			response = resultDict[(operationId,client)]
 			send(('client_operation_response',operationName,operationId,response,shuttle.getResultProof(),logical_clock(),self),to = client)
+			replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
 			send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = prevReplica)
 			
 		else:

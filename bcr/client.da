@@ -36,6 +36,7 @@ class Client(process):
 		output('Client %i asking for configuration from  Olympus'%(clientNumber,), sep = str_exp, level = log_level)
 		await(some(received(('configuration_response' , _, _, _, c2),from_=olympus), has = c2 >=c))
 		
+
 		for load in self.workload:
 			key = load.key
 			value = load.value
@@ -44,14 +45,23 @@ class Client(process):
 			c = logical_clock()
 			send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
 			output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
-			if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)))):
+			if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)), has = c2 < c)):
                 
 				output('Client:%i received result:%s resultproof:%s from tail'%(clientNumber,result,resultProof), sep = str_exp, level = log_level)
 				continue
                 
-			elif timeout(120):
+
+			elif timeout(2):
 				output("Failed to receive the response in time, sending request to all replicas")
 				send(('client_retransmitted_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
+				
+				if await(some(received(('client_retransmitted_response', _operationName, _operationId,result,resultProof,c2,process)))):
+                
+					output('Client:%i received retransmitted result:%s resultproof:%s from replica:%s'%(clientNumber,result,resultProof,process), sep = str_exp, level = log_level)
+					continue
+                
+				elif timeout(2):
+					output("Failed to receive the response in time, ignoring request")
 				
 		
 		send(('done',self,clientNumber), to=parent())

@@ -29,7 +29,8 @@ class ReplicaHistory:
     def isResultShuttleArrivedForOperation(self,operation):
         if operation in self.operationStateDict:
             operationState = self.operationStateDict.get(operation)
-            return operationState.get_result_shuttle() is not None
+            re = operationState.get_result_shuttle() is not None
+            return re
         else:
             return False
         
