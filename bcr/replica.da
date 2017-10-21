@@ -88,21 +88,15 @@ class Replica(process):
 		orderStatement = OrderStatement(slot,operationName,operationId,index)
 		shuttle.addOrderStatement(orderStatement)
 		output('order proof of Replica:%i is %s' %(index, shuttle.orderProof))
-
 		resultStatement = ResultStatement(result,operationName,operationId,index)
 		shuttle.addResultStatement(resultStatement)
 		output('result proof of Replica:%i is %s' % (index, shuttle.resultProof))
-		
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)	
 		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
-		
 		failurecase = FailureCase(failcase,configuration,index,operationName,shuttle,clientNumber,messageType,self.messageNumber,self.head)
 		shuttle = failurecase.shuttle
 		#output('failure case for replica:%i is %s' % (index,failurecase))
 		
-		
-		
-	
 	def run():
 		output('Starting Replica', sep = str_exp, level = log_level)
 		-- yieldInitHist
@@ -280,7 +274,6 @@ class Replica(process):
 			output('Backward Shuttle passed validation at Replica:%i' % index)
 			replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
 			output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
-			
 			failurecase = FailureCase(failcase,configuration,index,operationName,shuttle,clientNumber,messagetype,self.messageNumber,self.head)
 			shuttle = failurecase.shuttle
 			#output('failure case with modifications for replica:%i is %s' % (index,failurecase))
