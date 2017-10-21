@@ -42,12 +42,14 @@ class Replica(process):
 		self.replicaPublic = None
 		self.validations =  Validations()
 		self.replicaHistory = ReplicaHistory()
+		self.crypto = Crypto()
 	
 	def actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle):
 		
 		result = None
 		orderStatement = OrderStatement(slot,operationName,operationId)
-		shuttle.addOrderStatement(orderStatement)
+		signedSerializedOrderStatements = crypto.sign(replicaPrivate,orderStatement)
+		shuttle.addOrderStatement(signedSerializedOrderStatements)
 		
 		result =None
 		if(operationName == 'put'):
@@ -71,8 +73,8 @@ class Replica(process):
 			if key in runningState.keys():
 				result = runningState[key]
 			resultDict[(operationId,client)] = result
-		
-		resultStatement = ResultStatement(result,operationName,operationId)
+		resultHash = crypto.getHash(result)
+		resultStatement = ResultStatement(resultHash,operationName,operationId)
 		shuttle.addResultStatement(resultStatement)
 		
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)
@@ -158,7 +160,7 @@ class Replica(process):
 		
 	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle)):
 		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
-		
+			
 		actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
 			
 		if(isTail):
@@ -175,7 +177,7 @@ class Replica(process):
 		output('Replica %i received backward shuttle'%(index,), sep = str_exp, level = log_level)
 		
 		replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
-		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
+		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i resultProof:%s]'%(index,runningState,operationName,operationId,shuttle.getResultProof()), sep = str_exp, level = log_level)
 		
 			
 		if isHead:
