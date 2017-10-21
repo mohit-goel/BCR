@@ -1,10 +1,11 @@
 
 class OrderStatement:
     
-    def __init__(self,slot,operationName,operationId):
+    def __init__(self,slot,operationName,operationId,replicaId):
         self.slot = slot
         self.operationName = operationName
         self.operationId = operationId
+        self.replicaId = replicaId
        
         
     def getSlot(self):

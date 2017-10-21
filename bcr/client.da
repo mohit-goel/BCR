@@ -48,6 +48,15 @@ class Client(process):
 			operationId = operationId+1
 			c = logical_clock()
 
+			send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
+			output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
+
+			#if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)), has = c2 < c)):
+			if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)))):
+				output('Client:%i received result:%s resultproof:%s from tail'%(clientNumber,result,resultProof), sep = str_exp, level = log_level)
+				continue
+
+
 			send(('getconfiguration',clientNumber), to=olympus)
 			if await(isConfigurationValid):
 				isValidResponse = False

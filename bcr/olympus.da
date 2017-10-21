@@ -21,7 +21,7 @@ rl = import_da('replica')
 class Olympus(process):
 
 	
-	def setup(nReplicas:int,clients:cl.Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list):
+	def setup(nReplicas:int,clients:cl.Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list,failures:dict):
 		self.head = None
 		self.tail = None
 		self.replicas = []
@@ -30,7 +30,12 @@ class Olympus(process):
 		self.clientPublic = clientPublic
 		self.replicaPublic = replicaPublic
 		self.replicaPrivate = replicaPrivate
+
 		self.isConfigurationValid=False
+
+		self.failure = failures
+		self.configuration = -1
+
 		
 		
 	
@@ -38,6 +43,7 @@ class Olympus(process):
 		output('Starting Olympus', sep = str_exp, level = log_level)
 		replicas = new(rl.Replica,num=nReplicas)
 		replicas = list(replicas)
+		configuration = configuration + 1
 		self.head = replicas[0]
 		self.tail = replicas[nReplicas-1]
 		running_State = dict()
@@ -45,7 +51,10 @@ class Olympus(process):
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):
-			send(('inithist',running_State,replicas,head,tail,i,c), to=replicas[i])
+			failcase = []
+			if (configuration,i) in failure.keys():
+				failcase = failure[(configuration,i)]
+			send(('inithist',running_State,replicas,head,tail,i,c,configuration,failcase), to=replicas[i])
 			output("Message inithist sent to replica %i" % (i,), sep = str_exp, level = log_level)
 			
 		
