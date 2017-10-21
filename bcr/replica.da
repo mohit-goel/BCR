@@ -117,7 +117,7 @@ class Replica(process):
 				generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 				
 			
-			if isHead:
+			elif isHead:
 				output('Replica:%i doesnot have result shuttle'%(index))	
 				if replicaHistory.isOperationExist((operationName,operationId,client)):
 					output('Replica:%i has already seen the operaation'%(index))
@@ -156,7 +156,7 @@ class Replica(process):
 		
 		
 		
-	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),from_=_prevReplica):
+	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle)):
 		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
 		
 		actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle)
@@ -168,7 +168,8 @@ class Replica(process):
 			send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = prevReplica)
 			
 		else:
-			send(('forward_shuttle',operationName,operationId,key,value,client,slot),to = nextReplica)
+			output('current:%s next:%s'%(self,nextReplica),sep = str_exp, level = log_level)
+			send(('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle),to = nextReplica)
 			
 	def receive(msg= ('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle),from_=_nextReplica):
 		output('Replica %i received backward shuttle'%(index,), sep = str_exp, level = log_level)
@@ -177,7 +178,7 @@ class Replica(process):
 		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
 		
 			
-		if(head):
+		if isHead:
 			output('backward shuttle reached head')
 			
 		else:

@@ -1,5 +1,5 @@
 import sys
-config(channel is fifo, clock is lamport)
+config(channel is {fifo,reliable}, clock is lamport)
 from enum import Enum
 import nacl.encoding
 import nacl.signing
@@ -26,8 +26,8 @@ def main():
 		config = configread(sys.argv[1])
 		output('configuration parameters are read from file')
 	nclients = config.num_client
-	nReplicas = 2
-	#nReplicas = 2*(config.failure_num) + 1
+	#nReplicas = 2
+	nReplicas = 2*(config.failure_num) + 1
 	config(clock='Lamport')
 	crypto = Crypto()
 	(olympusPrivate,olympusPublic) = crypto.getSignedKey()
