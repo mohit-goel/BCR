@@ -50,10 +50,11 @@ class Replica(process):
 		self.replicaHistory = ReplicaHistory()
 		self.failcase = []
 		self.messageNumber = MessageNumber()
+		self.crypto = Crypto()
 	
 	def actionsAtEveryReplica(operationName,key,value,operationId,client,slot,shuttle,clientNumber,messageType):
-		
 		result =None
+		
 		if(operationName == 'put'):
 			runningState[key] = [value]
 			result = 'OK'
@@ -83,12 +84,17 @@ class Replica(process):
 					runningState[key] = runningState[key][x:range]
 					result = 'OK'
 			resultDict[(operationId,client)] = result
+
 		
 
 		orderStatement = OrderStatement(slot,operationName,operationId,index)
-		shuttle.addOrderStatement(orderStatement)
+		signedSerializedOrderStatements = crypto.sign(replicaPrivate,orderStatement)
+		shuttle.addOrderStatement(signedSerializedOrderStatements)
 		output('order proof of Replica:%i is %s' %(index, shuttle.orderProof))
-		resultStatement = ResultStatement(result,operationName,operationId,index)
+
+		resultHash = crypto.getHash(result)
+		resultStatement = ResultStatement(resultHash,operationName,operationId,index)
+
 		shuttle.addResultStatement(resultStatement)
 		output('result proof of Replica:%i is %s' % (index, shuttle.resultProof))
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)	

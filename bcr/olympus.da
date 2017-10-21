@@ -28,11 +28,9 @@ class Olympus(process):
 		self.olympusPrivate =olympusPrivate
 		self.olympusPublic = olympusPublic
 		self.clientPublic = clientPublic
-		self.replicaPublic = replicaPublic
-		self.replicaPrivate = replicaPrivate
-
+		self.replicaPublicKeysList = replicaPublic
+		self.replicaPrivateKeysList = replicaPrivate
 		self.isConfigurationValid=False
-
 		self.failure = failures
 		self.configuration = -1
 
@@ -47,7 +45,7 @@ class Olympus(process):
 		self.head = replicas[0]
 		self.tail = replicas[nReplicas-1]
 		running_State = dict()
-		setup(replicas,(self,State.PENDING.value,olympusPublic,clientPublic,replicaPublic,replicaPrivate))
+		setup(replicas,(self,State.PENDING.value,olympusPublic,clientPublic,replicaPublicKeysList,replicaPrivateKeysList))
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):
