@@ -67,7 +67,7 @@ class Client(process):
 					continue
                 
 
-				elif timeout(20):
+				elif timeout(5):
 					output("Failed to receive the response in time, sending request to all replicas")
 					send(('getconfiguration',clientNumber), to=olympus)
 					if await(isConfigurationValid):

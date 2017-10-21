@@ -12,7 +12,7 @@ class OrderStatement:
         return self.slot
     
     def __str__(self):
-     return '[' + str(self.slot) + "," + str(self.operationName) + "," + str(self.operationId) + "]"
+     return '[' + str(self.slot) + "," + str(self.operationName) + "," + str(self.operationId) + "," + str(self.replicaId) + "]"
         
     
     

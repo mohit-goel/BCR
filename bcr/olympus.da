@@ -80,5 +80,5 @@ class Olympus(process):
 		send(('configuration_response',replicas,head,tail,logical_clock()), to=p)
 		
 	def receive(msg= ('reconfiguration_request',replicaIndex),from_=p):
-		output('Olympus received reconfiguration_request from process:%s' %(p), sep = str_exp, level = log_level)
+		#output('Olympus received reconfiguration_request from process:%s' %(p), sep = str_exp, level = log_level)
 		isConfigurationValid=False
