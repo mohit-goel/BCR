@@ -10,7 +10,6 @@ from State import  State
 from Validations import  Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
-from Shuttle import Shuttle
 from ReplicaHistory import ReplicaHistory
 from Validations import  Validations
 import pickle
@@ -19,7 +18,7 @@ log_level =20
 class Client(process):
 
 
-	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list):
+	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int):
 		self.q = []
 		self.head = None
 		self.tail=None
@@ -28,12 +27,19 @@ class Client(process):
 		self.operationId = 0
 		self.signedKey = signedKey
 		self.olympusPublic = olympusPublic
-		self.replicaPublic= replicaPublic
+		self.replicaPublicList= replicaPublic
 		self.workload = workload
 		self.validations =  Validations()
 		self.isValidResponse = False
 		self.operationName = None
 		self.isConfigurationValid = False
+		self.t = numberOfFailures
+		self.quoramSize=numberOfFailures +1
+		self.numberOfResponses=0
+		self.successfulResponseResultCountDict = None
+		self.maxResponsesPerResult =None
+		self.clientWorkLoadResultDict =dict()
+		self.resultWithMaxResponses=None
 	
 	def run():
 		c = logical_clock()
@@ -47,43 +53,64 @@ class Client(process):
 			operationName = load.action
 			operationId = operationId+1
 			c = logical_clock()
-
-			send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
-			output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
-
-			#if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)), has = c2 < c)):
-			if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)))):
-				output('Client:%i received result:%s resultproof:%s from tail'%(clientNumber,result,resultProof), sep = str_exp, level = log_level)
-				continue
-
-
+			
+			
 			send(('getconfiguration',clientNumber), to=olympus)
 			if await(isConfigurationValid):
 				isValidResponse = False
+				numberOfResponses = 0
+				successfulResponseResultCountDict = dict()
+				maxResponsesPerResult=0
+				
+				
 				send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
 				output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
-				#if await(some(received(('client_operation_response', _operationName, _operationId,result,resultProof,c2,_tail)), has = c2 < c)):
 				if await(isValidResponse):
-					continue
-                
+					output('Client:%i received VALID result'%(clientNumber,), sep = str_exp, level = log_level)
+					
+					clientWorkLoadResultDict[key] = resultWithMaxResponses
+					continue 
 
-				elif timeout(5):
-					output("Failed to receive the response in time, sending request to all replicas")
-					send(('getconfiguration',clientNumber), to=olympus)
-					if await(isConfigurationValid):
-						send(('client_retransmitted_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
-						if await(isValidResponse):
-							continue
-						elif timeout(22):
-							output("Failed to receive the response in time, ignoring request")
-					elif timeout(120):
-						output('client hasnot received valid configuration from olympus')
-						break
+				elif timeout(60):
+					output("Client :%i Failed to receive the response in time, sending request to all replicas"%(clientNumber,))
+					while(1):
+						numberOfResponses = 0
+						successfulResponseResultCountDict = dict()
+						maxResponsesPerResult=0
+						send(('getconfiguration',clientNumber), to=olympus)
+						if await(isConfigurationValid):
+							send(('client_retransmission_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
+							if await(numberOfResponses ==2*t+1):
+								output("Client :%i received :%i responses from replicas"%(clientNumber,numberOfResponses,))
+								if(maxResponsesPerResult >= t +1):
+									output("Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
+									clientWorkLoadResultDict[key] = resultWithMaxResponses
+									break
+								else:
+									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult))
+									initiateReconfigurationRequest()
+					
+									
+							elif timeout(120):
+								output("Failed to receive the response from all the replicas.Initiating reconfiguration")
+								initiateReconfigurationRequest()
+								
+								if(maxResponsesPerResult >= t +1):
+									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
+									clientWorkLoadResultDict[key] = resultWithMaxResponses
+									break
+							
+								
+								
+						elif timeout(120):
+							output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
+							break
 			
 			elif timeout(120):
-				output('client hasnot received valid configuration from olympus')
+				output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
 				break
 			
+		output('client %i workload output:%s'%(clientNumber,clientWorkLoadResultDict))
 		send(('done',self,clientNumber), to=parent())
 		await(received(('done',), from_=parent()))
 		output('client received done from master')
@@ -92,20 +119,24 @@ class Client(process):
 		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
 
 	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
-		output('Client:%i received result:%s from tail%s'%(clientNumber,result,sender), sep = str_exp, level = log_level)
-		#output('Client:%i received result:%s resultproof:%s from tail%s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
-		isValidResponse = validations.responseReceivedWithCorrectOperation(receivedOperationName,receivedOperationId)
-		isValidResponse = isValidResponse and validations.clientValidationOfResultProof(result,resultProof)
-		if  not isValidResponse:
-			isConfigurationValid = False
-			output('client:%i sending reconfigurationrequest to olympus'%(clientNumber))
-			send(('reconfiguration_request',clientNumber),to = olympus)
-		
-	def receive(msg= ('client_retransmitted_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender)):
-		output('Client:%i received result:%s resultproof:%s from tail%s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
-		
-		isValidResponse = validations.responseReceivedWithCorrectOperation(receivedOperationName,receivedOperationId)
-		isValidResponse = isValidResponse and validations.clientValidationOfResultProof(result,resultProof)
+		output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
+		isValidResponse = validations.responseReceivedWithCorrectOperation(operationName,operationId,receivedOperationName,receivedOperationId)
+		isValidResponse = isValidResponse and validations.validationOfResultProof(result,resultProof,replicaPublicList)
+		numberOfResponses = numberOfResponses+1
+		if isValidResponse:
+			if result in successfulResponseResultCountDict:
+				successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] +1 
+			else:
+				successfulResponseResultCountDict[result] = 1
+				
+			if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
+				maxResponsesPerResult = successfulResponseResultCountDict[result]
+				resultWithMaxResponses = result
+				
+	def initiateReconfigurationRequest():
+		isConfigurationValid = False
+		send(('reconfiguration_request',index),to = olympus)
+						
 		
 	def receive(msg= ('getconfiguration_response',isValid),from_=_olympus):
 		isConfigurationValid = isValid

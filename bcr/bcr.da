@@ -55,7 +55,7 @@ def main():
 	
 	olympus = new(ol.Olympus,num= 1)
 	for i in range(nclients):
-		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i]))
+		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i],config.failure_num))
 	
 	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate,config.failure))
 	start(olympus)
