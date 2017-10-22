@@ -121,7 +121,10 @@ class Client(process):
 	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
 		output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
 		isValidResponse = validations.responseReceivedWithCorrectOperation(operationName,operationId,receivedOperationName,receivedOperationId)
-		isValidResponse = isValidResponse and validations.validationOfResultProof(result,resultProof,replicaPublicList)
+		output('Client:%i is operation matched'%(isValidResponse))
+		isResultValid = validations.validationOfResultProof(result,resultProof,replicaPublicList)
+		output('Client:%i is result matched'%(isResultValid))
+		isValidResponse = isValidResponse and isResultValid
 		numberOfResponses = numberOfResponses+1
 		if isValidResponse:
 			if result in successfulResponseResultCountDict:

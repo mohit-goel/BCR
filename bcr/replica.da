@@ -264,7 +264,9 @@ class Replica(process):
 
 
 	def validateBackwardShuttle(operationId,slot,client,shuttle):
-		return validations.validationOfResultProof(resultDict[(operationId,client)],shuttle.resultProof,replicaPublicList)
+		isResultValid = validations.validationOfResultProof(resultDict[(operationId,client)],shuttle.resultProof,replicaPublicList)
+		output('Client:%i is result matched'%(isResultValid))
+		return isResultValid
 
 			
 	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),from_=_prevReplica):
