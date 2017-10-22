@@ -88,12 +88,12 @@ class Client(process):
 									break
 								else:
 									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult))
-									initiateReconfigurationRequest()
+									initiateReconfigurationRequest(clientNumber)
 					
 									
 							elif timeout(120):
 								output("Failed to receive the response from all the replicas.Initiating reconfiguration")
-								initiateReconfigurationRequest()
+								initiateReconfigurationRequest(clientNumber)
 								
 								if(maxResponsesPerResult >= t +1):
 									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
@@ -133,7 +133,7 @@ class Client(process):
 				maxResponsesPerResult = successfulResponseResultCountDict[result]
 				resultWithMaxResponses = result
 				
-	def initiateReconfigurationRequest():
+	def initiateReconfigurationRequest(index):
 		isConfigurationValid = False
 		send(('reconfiguration_request',index),to = olympus)
 						
