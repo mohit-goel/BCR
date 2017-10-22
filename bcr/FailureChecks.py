@@ -5,5 +5,5 @@ class FailureChecks:
         self.drop_result_stmt = False
     
     def __str__(self):
-        return " change_oper " + str(self.change_operation) + " change_result "+ str(self.change_result) + " drop_result "+str(drop_result_stmt)
+        return " change_oper=" + str(self.change_operation) + " change_result="+ str(self.change_result) + " drop_result="+str(self.drop_result_stmt)
         

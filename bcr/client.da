@@ -11,7 +11,6 @@ from Validations import  Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
 from ReplicaHistory import ReplicaHistory
-from Validations import  Validations
 import pickle
 str_exp = ','
 log_level =20
@@ -64,7 +63,7 @@ class Client(process):
 				
 				
 				send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
-				output('Client %i sent (%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
+				output('Client %i sent (operationName,operationId,key,value):(%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
 				if await(isValidResponse):
 					output('Client:%i received VALID result'%(clientNumber,), sep = str_exp, level = log_level)
 					
@@ -119,11 +118,12 @@ class Client(process):
 		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
 
 	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
-		output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
+		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
+		output('Client:%i received result:%s from %s'%(clientNumber,result,sender), sep = str_exp, level = log_level)
 		isValidResponse = validations.responseReceivedWithCorrectOperation(operationName,operationId,receivedOperationName,receivedOperationId)
-		output('Client:%i is operation matched'%(isValidResponse))
+		output('Client:%i is operation valid: %s'%(clientNumber, str(isValidResponse)))
 		isResultValid = validations.validationOfResultProof(result,resultProof,replicaPublicList)
-		output('Client:%i is result matched'%(isResultValid))
+		output('Client:%i is result valid: %s'%(clientNumber,str(isResultValid)))
 		isValidResponse = isValidResponse and isResultValid
 		numberOfResponses = numberOfResponses+1
 		if isValidResponse:

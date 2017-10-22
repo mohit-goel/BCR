@@ -1,9 +1,9 @@
-test_case_name = test_t2c2f1_1
+test_case_name = test_t2c2f1_2
 t = 1
 num_client = 2
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
 workload[0] = put('movie','star'); slice('movie','1:4')
-workload[1] = get('movie'); put('movie','stars')
-failures[0,2] = shuttle(0,0), change_result()
+workload[1] = put('movie','stars'); get('movie')
+failures[0,1] = result_shuttle(0,0), drop_result_stmt()
