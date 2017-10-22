@@ -136,7 +136,7 @@ class Replica(process):
 		if await(replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client))):
 			generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 							
-		elif timeout(120):
+		elif timeout(180):
 			output('Replica:%i timeout out waiting for backward shuttle client:%s'%(index,client), sep = str_exp, level = log_level)
 			send(('reconfiguration_request',index),to = olympus)
 	
@@ -169,13 +169,11 @@ class Replica(process):
 		
 		if res:
 			if sender in replicaChain:
-				output('---------in 1--------')
 				messagetype = MessageTypes.FORWARDED
-				messageNumber.incrementMessageType(clientNumber,messagetype)
 			else:
-				output('---------in 2--------')
 				messagetype = MessageTypes.DIRECT
-				messageNumber.incrementMessageType(clientNumber,messagetype)
+				
+			messageNumber.incrementMessageType(clientNumber,messagetype)
 			output('Replica:%i {client:{message_type>messagecount}:%s'%(index, messageNumber.getDict()))
 			failurecase = FailureCase(failcase,index,clientNumber,messagetype,messageNumber,failureChecks)
 			self.failureChecks = failurecase.failureChecks
@@ -207,7 +205,7 @@ class Replica(process):
 					
 			else:
 				output('Replica:%i is not head. Sending the retransmitted request to head:%s'%(index,head))	
-				send(('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber),to=head)
+				send(('client_retransmission_request',operationName,key,value,client,operationId,clock,clientNumber),to=head)
 				awaitingForBackwardShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 					
 					
