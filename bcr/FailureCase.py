@@ -1,18 +1,14 @@
 import sys
 from MessageTypes import MessageTypes
 class FailureCase:
-    def __init__(self,failcase,configuration,index,operationName,shuttle,clientNumber,messageType,messageNumber,head):
+    def __init__(self,failcase,index,clientNumber,messageType,messageNumber,failureChecks):
         self.failcase = failcase
-        self.configuration = configuration
         self.index = index
-        self.operationName = operationName
-        self.shuttle = shuttle
         self.clientNumber = clientNumber
         self.messageType = messageType
         self.messageNumber = messageNumber
-        self.action = ""
         self.failure = None
-        self.head = head
+        self.failureChecks = failureChecks
 
         for fail in failcase:
             print(self.messageType)
@@ -31,32 +27,14 @@ class FailureCase:
                     doFailure(fail.action) 
                         
     def doFailure(self,action):
-        self.action = action
-        orderstmts = self.shuttle.orderProof.getlistOfOrderSt()
-        resultstmts = self.shuttle.resultProof.getlistOfResultSt()
         print('Encountered Failure Scenario')
         if action == "change_operation":
-            for x in orderstmts:
-                if (x.replicaId == self.index) :
-                    x.operationName = 'get'
-                    #x.key = 'x'
-                    #x.value = None 
-            for x in resultstmts:
-                if (x.replicaId == self.index) :
-                    x.operationName = 'get'
-            print('operation is modified to %s' % x.operationName)   
+            self.failureChecks.change_operation = True  
         elif action == "change_result":
-            for x in resultstmts:
-                if (x.replicaId == self.index):
-                    x.result = 'OK'
-                    print('result is modified to %s' % x.result)
-        elif action == "drop_result_stmt":    
-            resultstmts = [x for x in resultstmts if x.replicaId != 0]
-            self.shuttle.resultProof.setlistOfOrderSt(resultstmts)
-            print('Head result statement is dropped in shuttle %s' % self.shuttle)
-        
+            self.failureChecks.change_result = True 
+        elif action == "drop_result_stmt":
+            self.failureChecks.drop_result_stmt = True    
  
     def __str__(self):
-     #return '[' + ",".join(self.failcase) +";" +  str(self.operationName) + ";" + str(self.key) + ";" + str(self.value)
-     return  str(self.failure) + " for messagetype:" + str(self.messageType) + " and operation:" + str(self.operationName)
+     return  str(self.failure)
  
