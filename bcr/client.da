@@ -11,13 +11,15 @@ from Validations import  Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
 from ReplicaHistory import ReplicaHistory
+from Operation import Operation
+from TestCases import TestCases
 import pickle
 str_exp = ','
 log_level =20
 class Client(process):
 
 
-	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int):
+	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int,testCases:TestCases):
 		self.q = []
 		self.head = None
 		self.tail=None
@@ -67,7 +69,7 @@ class Client(process):
 				if await(isValidResponse):
 					output('Client:%i received VALID result'%(clientNumber,), sep = str_exp, level = log_level)
 					
-					clientWorkLoadResultDict[key] = resultWithMaxResponses
+					modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 					continue 
 
 				elif timeout(60):
@@ -83,7 +85,7 @@ class Client(process):
 								output("Client :%i received :%i responses from replicas"%(clientNumber,numberOfResponses,))
 								if(maxResponsesPerResult >= t +1):
 									output("Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
-									clientWorkLoadResultDict[key] = resultWithMaxResponses
+									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 									break
 								else:
 									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult))
@@ -96,7 +98,7 @@ class Client(process):
 								
 								if(maxResponsesPerResult >= t +1):
 									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
-									clientWorkLoadResultDict[key] = resultWithMaxResponses
+									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 									break
 							
 								
@@ -110,13 +112,21 @@ class Client(process):
 				break
 			
 		output('client %i workload output:%s'%(clientNumber,clientWorkLoadResultDict))
-		send(('done',self,clientNumber), to=parent())
+		testCases.verify(clientNumber,clientWorkLoadResultDict)
+		
+		send(('done',self,clientNumber,clientWorkLoadResultDict), to=parent())
 		await(received(('done',), from_=parent()))
 		output('client received done from master')
 		output('client sending done to olympus')
 		send(('done',self,clientNumber), to=olympus)
 		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
-
+	
+	def modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value):
+		if(resultWithMaxResponses == 'OK'):
+			operation = Operation(operationName,key,value)
+			result = operation.performOperation(clientWorkLoadResultDict)
+			
+	
 	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
 		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
 		output('Client:%i received result:%s from %s'%(clientNumber,result,sender), sep = str_exp, level = log_level)

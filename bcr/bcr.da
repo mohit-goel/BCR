@@ -14,6 +14,7 @@ from Shuttle import Shuttle
 from ReplicaHistory import ReplicaHistory
 import pickle
 from configread import configread
+from TestCases import TestCases
 str_exp = ','
 log_level =20
 cl = import_da('client')	
@@ -25,6 +26,7 @@ def main():
 	if len(sys.argv) > 1:
 		config = configread(sys.argv[1])
 		output('configuration parameters are read from file')
+	
 	nclients = config.num_client
 	#nReplicas = 2
 	nReplicas = 2*(config.failure_num) + 1
@@ -52,16 +54,17 @@ def main():
 		
 	clients = new(cl.Client,num=nclients)
 	clients = list(clients)
-	
+	masterDict = dict()
+	testCases = TestCases(config.test_case_name,masterDict)
 	olympus = new(ol.Olympus,num= 1)
 	for i in range(nclients):
-		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i],config.failure_num))
+		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i],config.failure_num,testCases))
 	
 	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate,config.failure))
 	start(olympus)
 	start(clients)
 	
-	await(each(client in clients, has= some(received(('done', _client,_)))))
+	await(each(client in clients, has= some(received(('done', _client,_,_)))))
 	output('master receiveded done from all clients', sep = str_exp, level = log_level)
 	send(('done',), to=clients)
 	output('master acknowledge done to clients')
@@ -70,6 +73,7 @@ def main():
 	
 	await(some(received(('done',), from_=olympus)))
 	output('master received  done from  olympus')
+		
 	
 	
 
