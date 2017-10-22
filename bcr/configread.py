@@ -2,15 +2,19 @@ import sys
 import re
 from WorkloadObj import WorkloadObj
 from FailureObj import FailureObj
+from PseudoRandom import  PseudoRandom
 
 class configread:
     def __init__(self,inp):
+        self.pseudoRandom = PseudoRandom()
         input_file = inp
         self.workload = dict()
         self.host = dict()
         self.client_host = dict()
         self.replica_host = dict()
         self.failure = dict()
+        self.pseudorandom_workload = []
+        
         with open(input_file) as f:
             for line in f:
                 if line[0] != '#':
@@ -53,6 +57,18 @@ class configread:
                             for x in pattern:
                                 self.replica_host[i] = x
                                 i = i+1
+                        elif line.startswith('pseudorandom_workload'):
+                            pattern = re.split(';', val)
+                            pattern = [x.strip() for x in pattern]
+                            for x in pattern:
+                                x = x.replace(")","")
+                                x = x.replace("'","")
+                                x = x.replace("(", ",")
+                                object = re.split(',', x)
+                                y = WorkloadObj(object)
+                                self.pseudorandom_workload.append(y)
+                            
+                            
                         elif line.startswith('workload'):
                             i = int(re.search(r'\d+', key).group())
                             self.workload[i] = []
@@ -64,7 +80,14 @@ class configread:
                                 x = x.replace("(", ",")
                                 object = re.split(',', x)
                                 y = WorkloadObj(object)
-                                self.workload[i].append(y)
+                                if y.action == 'pseudorandom':
+                                    list = self.pseudoRandom.select_random_elements_of_list(self.pseudorandom_workload,int(y.value),int(y.key))
+                                    for x in list:
+                                        self.workload[i].append(x)
+                                        
+                                    
+                                else:
+                                    self.workload[i].append(y)
                         elif line.startswith('failures'):
                             number = re.findall(r'\d+', key)
                             i = int(number[0])

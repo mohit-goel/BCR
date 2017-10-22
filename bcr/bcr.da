@@ -19,6 +19,7 @@ str_exp = ','
 log_level =20
 cl = import_da('client')	
 ol = import_da('olympus')
+rl = import_da('replica')
 	
 
 

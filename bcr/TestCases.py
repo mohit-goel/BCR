@@ -6,7 +6,7 @@ class TestCases:
         self.masterDict = masterDict
         
     def verify(self,clientNumber,clientResultDict):
-        print('in verify')
+        print('Verifying Test case:%s client:%i',self.testCaseName,clientNumber)
         return True
 
 

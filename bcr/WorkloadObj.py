@@ -8,3 +8,6 @@ class WorkloadObj:
             self.value = object[2].strip()
         else:
             self.value = None
+            
+    def __str__(self):
+     return '[' + str(self.action) + ":" + str(self.key) + ":" + str(self.value) + ']'

@@ -1,9 +1,10 @@
 test_case_name = test_t2c2f1_1
 t = 1
+pseudorandom_workload = put('movie','star');append('movie','wars');get('movie');slicet('movie','1:3')
 num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star')
-#workload[1] = put('movie','stars')
+workload[0] = pseudorandom(233,5)
+workload[1] = put('movie','stars')
 #failures[0,0] = client_request(0,0), change_operation()
