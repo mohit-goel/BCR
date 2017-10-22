@@ -14,17 +14,20 @@ class FailureCase:
             print(self.messageType)
             if (fail.condition == "client_request") & (self.messageType == MessageTypes.DIRECT):
                 if (fail.client == self.clientNumber) & (fail.requestnum == messageNumber.clientMessageTypeCountDict[self.clientNumber][self.messageType]):
-                    self.failure = fail.condition + "(" +str(fail.client)+ "," + str(fail.requestnum) + ")" + fail.action + "()"
-                    doFailure(fail.action)
+                    self.failure = fail.condition + "(" +str(fail.client)+ "," + str(fail.requestnum) + ")," + fail.action + "()"
+                    self.doFailure(fail.action)
             elif (fail.condition == "forwarded_request") & (self.messageType == MessageTypes.FORWARDED):
                 if (fail.client == self.clientNumber) & (fail.requestnum == messageNumber.clientMessageTypeCountDict[self.clientNumber][self.messageType]):
-                    doFailure(fail.action)
+                    self.failure = fail.condition + "(" +str(fail.client)+ "," + str(fail.requestnum) + ")," + fail.action + "()"
+                    self.doFailure(fail.action)
             elif (fail.condition == "shuttle") & (self.messageType == MessageTypes.SHUTTLE):
                 if (fail.client == self.clientNumber) & (fail.requestnum == messageNumber.clientMessageTypeCountDict[self.clientNumber][self.messageType]):
+                    self.failure = fail.condition + "(" +str(fail.client)+ "," + str(fail.requestnum) + ")," + fail.action + "()"
                     self.doFailure(fail.action)
             elif (fail.condition == "result_shuttle") & (self.messageType == MessageTypes.RESULT_SHUTTLE):
                 if (fail.client == self.clientNumber) & (fail.requestnum == messageNumber.clientMessageTypeCountDict[self.clientNumber][self.messageType]):
-                    doFailure(fail.action) 
+                    self.failure = fail.condition + "(" +str(fail.client)+ "," + str(fail.requestnum) + ")," + fail.action + "()"
+                    self.doFailure(fail.action) 
                         
     def doFailure(self,action):
         print('Encountered Failure Scenario')

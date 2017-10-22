@@ -3,8 +3,7 @@ from State import  State
 class Validations:
     
     
-    def shouldReplicaAcceptRequest(self,state):
-       
+    def shouldReplicaAcceptRequest(self,state):  
         if state.value is not State.ACTIVE.value:
             return False
         else:
@@ -15,7 +14,6 @@ class Validations:
     
     def responseReceivedWithCorrectOperation(self,operationName,operationId):
         return True
-    
     
         
             

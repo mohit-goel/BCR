@@ -16,6 +16,5 @@ class MessageNumber:
       
     def getDict(self):
         return self.clientMessageTypeCountDict
-        
-        
+           
     

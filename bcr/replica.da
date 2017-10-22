@@ -89,8 +89,9 @@ class Replica(process):
 					result = 'OK'
 			resultDict[(operationId,client)] = result
 		
-		if self.failureChecks.change_operation == True :
+		if (self.failureChecks.change_operation == True) & (self.isTail == False) :
 			operationName = 'get'
+			output('operation modified for forward shuttle in Replica:%i' % index)
 			self.failureChecks.change_operation = False
 			#key = 'x'
 			#value = None
@@ -98,15 +99,16 @@ class Replica(process):
 		orderStatement = OrderStatement(slot,operationName,operationId,index)
 		signedSerializedOrderStatements = crypto.sign(replicaPrivate,orderStatement)
 		shuttle.addOrderStatement(signedSerializedOrderStatements)
-		output('order proof of Replica:%i is %s' %(index, shuttle.orderProof))
+		#output('order proof of Replica:%i is %s' %(index, shuttle.orderProof))
 
 		resultHash = crypto.getHash(result)
 		resultStatement = ResultStatement(resultHash,operationName,operationId,index)
 		signedSerializedResultStatements = crypto.sign(replicaPrivate,resultStatement)
 		shuttle.addResultStatement(signedSerializedResultStatements)
-		output('result proof of Replica:%i is %s' % (index, shuttle.resultProof))
+		#output('result proof of Replica:%i is %s' % (index, shuttle.resultProof))
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)	
-		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
+		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i ]'%(index,runningState,operationName,operationId), sep = str_exp, level = log_level)
+		#output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
 		#output('failure case for replica:%i is %s' % (index,failurecase))
 		
 	def run():
@@ -132,6 +134,29 @@ class Replica(process):
 		elif timeout(120):
 			output('Replica:%i timeout out waiting for backward shuttle client:%s'%(index,client), sep = str_exp, level = log_level)
 			send(('reconfiguration_request',index),to = olympus)
+	
+	def resultCheck(tshuttle):
+		shuttle = tshuttle
+		if (self.failureChecks.change_result == True) :	
+			resultstmtlist = shuttle.resultProof.getlistOfResultSt()
+			currentEncodedSt = resultstmtlist[index]
+			currentKey = replicaPublicList[index];
+			decodeSt = crypto.isSignatureVerified(currentKey,currentEncodedSt)
+			decodeSt.result = crypto.getHash(decodeSt.result)
+			signedSerializedResultStatements = crypto.sign(replicaPrivate,decodeSt)
+			resultstmtlist[index] = signedSerializedResultStatements
+			shuttle.resultProof.setlistOfOrderSt(resultstmtlist)
+			output('Result Shuttle modified in Replica:%i' % index)
+			self.failureChecks.change_result = False
+				
+		if (self.failureChecks.drop_result_stmt == True) :
+			resultstmtlist = shuttle.resultProof.getlistOfResultSt()
+			resultstmtlist = resultstmtlist[1:]
+			shuttle.resultProof.setlistOfOrderSt(resultstmtlist)
+			output('Result Shuttle modified in Replica:%i' % index)
+			self.failureChecks.drop_result_stmt = False
+		
+		return shuttle
 		
 	def receive(msg= ('client_retransmitted_request',operationName,key,value,client,operationId,clock,clientNumber),from_=sender):
 		output('Replica %i received retransmitted request from process:%s client:%s '%(index,sender,client), sep = str_exp, level = log_level)	
@@ -167,15 +192,14 @@ class Replica(process):
 					
 	def receive(msg= ('client_operation_request',operationName,key,value,client,operationId,logical_Clock,clientNumber)):
 		if validations.shouldReplicaAcceptRequest(self.state):
-		
-			output('Replica %i received operation request from client %i '%(index,clientNumber), sep = str_exp, level = log_level)
-			
+					
 			messagetype = MessageTypes.DIRECT
 			messageNumber.incrementMessageType(clientNumber,MessageTypes.DIRECT)
+			output('Replica %i received client_operation request %s from client %i '%(index,str(messageNumber.getClientMessageTypeCount(clientNumber,messagetype)),clientNumber), sep = str_exp, level = log_level)
 			output('Replica:%i message count:%s'%(index, messageNumber.getDict()))
 			failurecase = FailureCase(failcase,index,clientNumber,messagetype,messageNumber,failureChecks)
 			self.failureChecks = failurecase.failureChecks
-			output('Failure trigger is %s for the received message in Replica: %i' % (failurecase,index))
+			output('Failure trigger is %s for the client_operation request %s in Replica: %i' % (failurecase,str(messageNumber.getClientMessageTypeCount(clientNumber,messagetype)),index))
 
 			orderProof = None
 			resultProof = None
@@ -235,8 +259,8 @@ class Replica(process):
 			return False
 		resultSt = shuttle.resultProof.getlistOfResultSt()
 		for i in range(len(resultSt)):
-			currentEncodedSt = resultSt[i];
-			currentKey = replicaPublicList[i];
+			currentEncodedSt = resultSt[i]
+			currentKey = replicaPublicList[i]
 			decodeSt = crypto.isSignatureVerified(currentKey,currentEncodedSt)
 			if (decodeSt is None):
 				output("Result Shuttle validation fail: Signature not verified")
@@ -250,14 +274,15 @@ class Replica(process):
 			
 	def receive(msg= ('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),from_=_prevReplica):
 		
-		output('Replica %i received forward shuttle'%(index,), sep = str_exp, level = log_level)
 		messagetype = MessageTypes.SHUTTLE
 		messageNumber.incrementMessageType(clientNumber,messagetype)
+		output('Replica %i received forward shuttle %s for client %i'%(index,str(messageNumber.getClientMessageTypeCount(clientNumber,messagetype)),clientNumber), sep = str_exp, level = log_level)
+		#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
 		output('Replica:%i message count:%s'%(index, messageNumber.getDict()))
 		
 		failurecase = FailureCase(failcase,index,clientNumber,messagetype,messageNumber,failureChecks)
 		self.failureChecks = failurecase.failureChecks
-		output('Failure trigger is %s for the received message in Replica: %i' % (failurecase,index))
+		output('Failure trigger is %s for the forward shuttle in Replica: %i' % (failurecase,index))
 		
 		if(validateForwardShuttle(operationId,operationName,slot,shuttle)==False):
 			send(('reconfiguration_request',index),to = olympus)
@@ -270,9 +295,12 @@ class Replica(process):
 			
 			if(isTail):
 				response = resultDict[(operationId,client)]
+				shuttle = self.resultCheck(shuttle)
 				send(('client_operation_response',operationName,operationId,response,shuttle.getResultProof(),logical_clock(),self),to = client)
+				output('client result shuttle sent from tail')
 				replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
 				send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),to = prevReplica)
+				output('backward shuttle generated from tail')
 			
 			else:
 				send(('forward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),to = nextReplica)
@@ -281,9 +309,10 @@ class Replica(process):
 	
 	def receive(msg= ('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),from_=_nextReplica):
 		
-		output('Replica %i received backward shuttle'%(index,), sep = str_exp, level = log_level)
+		
 		messagetype = MessageTypes.RESULT_SHUTTLE
 		messageNumber.incrementMessageType(clientNumber,messagetype)
+		output('Replica %i received backward shuttle %s for client %i'%(index,str(messageNumber.getClientMessageTypeCount(clientNumber,messagetype)),clientNumber), sep = str_exp, level = log_level)
 		output('Replica:%i message count:%s'%(index, messageNumber.getDict()))
 		failurecase = FailureCase(failcase,index,clientNumber,messagetype,messageNumber,failureChecks)
 		self.failureChecks = failurecase.failureChecks	
@@ -296,15 +325,15 @@ class Replica(process):
 		else:
 			output('Backward Shuttle passed validation at Replica:%i' % index)
 			replicaHistory.setResultShuttleForOperation((operationName,operationId,client),shuttle)
-			output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
-			
+			output('[Replica:%i runningState:%s OperationName:%s OperationId:%i]'%(index,runningState,operationName,operationId), sep = str_exp, level = log_level)
+			#output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
 
 			if isHead:
 				output('backward shuttle reached head')
-			else:
+			else:	
+				shuttle = self.resultCheck(shuttle)
 				send(('backward_shuttle',operationName,key,value,client,operationId,slot,shuttle,clientNumber),to = prevReplica)
 		
-	
 	def receive(msg= ('inithist',running_State,replicas,head,tail,index,c,configuration,failcase),from_=_olympus,at=(yieldInitHist,)):
 		
 		self.head = head

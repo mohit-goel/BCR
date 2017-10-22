@@ -92,8 +92,8 @@ class Client(process):
 		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
 
 	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
-		output('Client:%i received result:%s resultproof:%s from tail%s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
-		
+		output('Client:%i received result:%s from tail%s'%(clientNumber,result,sender), sep = str_exp, level = log_level)
+		#output('Client:%i received result:%s resultproof:%s from tail%s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
 		isValidResponse = validations.responseReceivedWithCorrectOperation(receivedOperationName,receivedOperationId)
 		isValidResponse = isValidResponse and validations.clientValidationOfResultProof(result,resultProof)
 		if  not isValidResponse:

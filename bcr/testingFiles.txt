@@ -533,8 +533,9 @@ num_client = 2
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star')
+workload[0] = put('movie','star'); slice('movie','1:4')
 workload[1] = put('movie','stars')
+failures[0,0] = client_request(0,0), change_operation()
 
 Description: 1 client, 3 replicas. Client sends put. Head receives put and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
 Dict: 'movie': ['star'] , Result: OK
@@ -546,21 +547,24 @@ num_client = 2
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','stars')
-workload[1] = get('movie')
+workload[0] = put('movie','star'); slice('movie','1:4')
+workload[1] = put('movie','stars'); get('movie')
+failures[0,1] = shuttle(0,0), change_operation()
 
-Description: 1 client, 3 replicas. Client sends get. Head receives get and verifies dict, sends empty string in forward shuttle. All other replicas verify their dict and append result(empty string) to forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
+Description: 1 client, 3 replicas. Client sends operation. Head receives get and verifies dict, sends empty string in forward shuttle. All other replicas verify their dict and append result(empty string) to forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
+
 Dict: {} , Result: fail
 
 
 test_case_name = test_t2c2f1_3
-t = 2
+t = 1
 num_client = 2
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','stars')
-workload[1] = append('movie','stars')
+workload[0] = put('movie','star'); slice('movie','1:4')
+workload[1] = get('movie'); put('movie','stars')
+failures[0,2] = shuttle(0,0), change_result()
 
 Description: 1 client, 3 replicas. Client sends append. Head receives append and verifies dict, sends fail as result in forward shuttle. All other replicas verify their dict and send fail in forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
 Dict: {} , Result: fail
