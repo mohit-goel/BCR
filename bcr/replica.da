@@ -62,32 +62,33 @@ class Replica(process):
 		if(operationName == 'put'):
 			runningState[key] = value
 			result = 'OK'
-			resultDict[(operationId,client)] = result
+			
 		elif(operationName == 'get'):
 			result = ""
-			if key in runningState.keys():
+			if key in runningState:
 				result = runningState[key]
-			resultDict[(operationId,client)] = result
+			
 		elif(operationName == 'append'):
-			result = 'OK'
-			if key in runningState.keys():
+			result = 'fail'
+			if key in runningState:
+				result = 'OK'
 				runningState[key] = runningState[key] + value
-			else:
-				result = 'fail'
-			resultDict[(operationId,client)] = result
+			
 		elif(operationName == 'slice'):
 			result = 'fail'
-			if key in runningState.keys():
+			if key in runningState:
 				value = re.split(":",value)
 				x = int(value[0])
 				range = int(value[1])
 				klength = len(runningState[key])
-				if (x < klength) and (range <= klength):
+				if (x>=0 and x<=range and x < klength) and (range>=0 and range <= klength):
 					#modif = runningState[key]
 					#modif = modif[x:min(range,(klength-1))]
 					runningState[key] = runningState[key][x:range]
 					result = 'OK'
-			resultDict[(operationId,client)] = result
+		
+			
+		resultDict[(operationId,client)] = result
 		
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)	
 		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i ]'%(index,runningState,operationName,operationId), sep = str_exp, level = log_level)
@@ -110,11 +111,6 @@ class Replica(process):
 		output('Replica:%i result statement [result_hash,operationName,operationId,replicaId]:%s is signed,appended to result Proof' %(index,resultStatement))
 		signedSerializedResultStatements = crypto.sign(replicaPrivate,resultStatement)
 		shuttle.addResultStatement(signedSerializedResultStatements)
-
-		#output('result proof of Replica:%i is %s' % (index, shuttle.resultProof))
-		
-		#output('[Replica:%i runningState:%s OperationName:%s OperationId:%i replicaHistory:%s]'%(index,runningState,operationName,operationId,replicaHistory), sep = str_exp, level = log_level)
-		#output('failure case for replica:%i is %s' % (index,failurecase))
 		
 	def run():
 		output('Starting Replica', sep = str_exp, level = log_level)
