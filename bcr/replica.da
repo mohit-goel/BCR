@@ -60,7 +60,7 @@ class Replica(process):
 		result =None
 		
 		if(operationName == 'put'):
-			runningState[key] = [value]
+			runningState[key] = value
 			result = 'OK'
 			resultDict[(operationId,client)] = result
 		elif(operationName == 'get'):
@@ -71,7 +71,7 @@ class Replica(process):
 		elif(operationName == 'append'):
 			result = 'OK'
 			if key in runningState.keys():
-				runningState[key].append(value)
+				runningState[key] = runningState[key] + value
 			else:
 				result = 'fail'
 			resultDict[(operationId,client)] = result
@@ -82,7 +82,7 @@ class Replica(process):
 				x = int(value[0])
 				range = int(value[1])
 				klength = len(runningState[key])
-				if (x < klength):
+				if (x < klength) and (range <= klength):
 					#modif = runningState[key]
 					#modif = modif[x:min(range,(klength-1))]
 					runningState[key] = runningState[key][x:range]
@@ -142,9 +142,7 @@ class Replica(process):
 	
 	def failureResultCheck(tshuttle):
 		shuttle = tshuttle
-		output("---------in 0----------")
 		if (self.failureChecks.change_result == True) :	
-			output("---------in 1----------")
 			resultstmtlist = shuttle.resultProof.getlistOfResultSt()
 			currentEncodedSt = resultstmtlist[index]
 			currentKey = replicaPublicList[index];
@@ -157,7 +155,6 @@ class Replica(process):
 			self.failureChecks.change_result = False
 				
 		if (self.failureChecks.drop_result_stmt == True) :
-			output("---------in 2----------")
 			resultstmtlist = shuttle.resultProof.getlistOfResultSt()
 			resultstmtlist = resultstmtlist[1:]
 			shuttle.resultProof.setlistOfOrderSt(resultstmtlist)
