@@ -3,81 +3,81 @@ config(channel is fifo, clock is lamport)
 from enum import Enum
 import nacl.encoding
 import nacl.signing
-from OrderProof  import OrderProof
+from OrderProof import OrderProof
 from OrderStatement import OrderStatement
 from Crypto import Crypto
-from State import  State
-from Validations import  Validations
+from State import State
+from Validations import Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
 from Shuttle import Shuttle
 from ReplicaHistory import ReplicaHistory
 import pickle
 str_exp = ','
-log_level =20
-cl = import_da('client')	
+log_level = 20
+cl = import_da('client')
 rl = import_da('replica')
 
 
 class Olympus(process):
 
-	
-	def setup(nReplicas:int,clients:cl.Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list,failures:dict,nonhead_timeout:int):
+	def setup(nReplicas: int, clients: cl.Client, olympusPrivate: nacl.signing.SigningKey, olympusPublic: nacl.signing.SigningKey, clientPublic: list, replicaPublic: list, replicaPrivate: list, failures: dict, nonhead_timeout: int):
 		self.head = None
 		self.tail = None
 		self.replicas = []
-		self.olympusPrivate =olympusPrivate
+		self.olympusPrivate = olympusPrivate
 		self.olympusPublic = olympusPublic
 		self.clientPublic = clientPublic
 		self.replicaPublicKeysList = replicaPublic
 		self.replicaPrivateKeysList = replicaPrivate
-		self.isConfigurationValid=False
+		self.isConfigurationValid = False
 		self.failure = failures
 		self.configuration = -1
 
-		
-		
-	
 	def run():
-		output('Starting Olympus', sep = str_exp, level = log_level)
-		replicas = new(rl.Replica,num=nReplicas)
+		output('Starting Olympus', sep=str_exp, level=log_level)
+		replicas = new(rl.Replica, num=nReplicas)
 		replicas = list(replicas)
 		configuration = configuration + 1
 		self.head = replicas[0]
-		self.tail = replicas[nReplicas-1]
+		self.tail = replicas[nReplicas - 1]
 		running_State = dict()
-		setup(replicas,(self,State.PENDING.value,olympusPublic,clientPublic,replicaPublicKeysList,replicaPrivateKeysList,nonhead_timeout))
+		setup(replicas, (self, State.PENDING.value, olympusPublic, clientPublic,
+                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout))
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):
 			failcase = []
-			if (configuration,i) in failure.keys():
-				failcase = failure[(configuration,i)]
-			send(('inithist',running_State,replicas,head,tail,i,c,configuration,failcase), to=replicas[i])
-			output("Message inithist sent to replica %i" % (i,), sep = str_exp, level = log_level)
-			
-		
-			
-		await(each(client in clients, has= some(received(('done', _client,_)))))
+			if (configuration, i) in failure.keys():
+				failcase = failure[(configuration, i)]
+			send(('inithist', running_State, replicas, head, tail,
+                            i, c, configuration, failcase), to=replicas[i])
+			output("Message inithist sent to replica %i" %
+			       (i,), sep=str_exp, level=log_level)
+
+		await(each(client in clients, has=some(received(('done', _client, _)))))
 		output('olympus received done from all clients')
 		output('olympus sending  done to all replicas')
 		send(('done',), to=replicas)
-		await(each(replica in replicas, has= some(received(('done',_replica)))))
+		await(each(replica in replicas, has=some(received(('done', _replica)))))
 		output('olympus received  done from all replicas')
 		send(('done',), to=parent())
-		
-		output('Olympus process is getting closed', sep = str_exp, level = log_level)
-	
-	def receive(msg= ('getconfiguration',clientNumber),from_=p):
-		send(('getconfiguration_response',isConfigurationValid), to=p)
-			
-	def receive(msg= ('configuration_request',clientNumber),from_=p):
-		output('Olympus received configuration_request from client %i' %(clientNumber,), sep = str_exp, level = log_level)
-		await(each(replica in replicas, has= some(received(('inithist_response', _replica)))))
-		isConfigurationValid=True
-		output('Olympus sending configuration response to client %i' %(clientNumber,), sep = str_exp, level = log_level)
-		send(('configuration_response',replicas,head,tail,logical_clock()), to=p)
-		
-	def receive(msg= ('reconfiguration_request',replicaIndex),from_=p):
+
+		output('Olympus process is getting closed', sep=str_exp, level=log_level)
+
+	def receive(msg=('getconfiguration', clientNumber), from_=p):
+		send(('getconfiguration_response', isConfigurationValid), to=p)
+
+	def receive(msg=('configuration_request', clientNumber), from_=p):
+		output('Olympus received configuration_request from client %i' %
+		       (clientNumber,), sep=str_exp, level=log_level)
+		await(each(replica in replicas, has=some(
+			received(('inithist_response', _replica)))))
+		isConfigurationValid = True
+		output('Olympus sending configuration response to client %i' %
+		       (clientNumber,), sep=str_exp, level=log_level)
+		send(('configuration_response', replicas, head, tail, logical_clock()), to=p)
+
+	def receive(msg=('reconfiguration_request', replicaIndex), from_=p):
 		#output('Olympus received reconfiguration_request from process:%s' %(p), sep = str_exp, level = log_level)
-		isConfigurationValid=False
+		isConfigurationValid = False

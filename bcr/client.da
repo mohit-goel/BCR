@@ -3,11 +3,11 @@ config(channel is fifo, clock is lamport)
 from enum import Enum
 import nacl.encoding
 import nacl.signing
-from OrderProof  import OrderProof
+from OrderProof import OrderProof
 from OrderStatement import OrderStatement
 from Crypto import Crypto
-from State import  State
-from Validations import  Validations
+from State import State
+from Validations import Validations
 from ResultProof import ResultProof
 from ResultStatement import ResultStatement
 from ReplicaHistory import ReplicaHistory
@@ -15,155 +15,170 @@ from Operation import Operation
 from TestCases import TestCases
 import pickle
 str_exp = ','
-log_level =20
+log_level = 20
 ol = import_da('olympus')
+
+
 class Client(process):
 
-
-	def setup(olympus:ol.Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int,testCases:TestCases,client_timeout:int):
+	def setup(olympus: ol.Olympus, clientNumber: int, signedKey: nacl.signing.SigningKey, olympusPublic: nacl.signing.SigningKey, replicaPublic: list, workload: list, numberOfFailures: int, testCases: TestCases, client_timeout: int):
 		self.q = []
 		self.head = None
-		self.tail=None
+		self.tail = None
 		self.replicas = None
 		self.upTime = logical_clock()
 		self.operationId = 0
 		self.signedKey = signedKey
 		self.olympusPublic = olympusPublic
-		self.replicaPublicList= replicaPublic
+		self.replicaPublicList = replicaPublic
 		self.workload = workload
-		self.validations =  Validations()
+		self.validations = Validations()
 		self.isValidResponse = False
 		self.operationName = None
 		self.isConfigurationValid = False
 		self.t = numberOfFailures
-		self.quoramSize=numberOfFailures +1
-		self.numberOfResponses=0
+		self.quoramSize = numberOfFailures + 1
+		self.numberOfResponses = 0
 		self.successfulResponseResultCountDict = None
-		self.maxResponsesPerResult =None
-		self.clientWorkLoadResultDict =dict()
-		self.resultWithMaxResponses=None
-	
+		self.maxResponsesPerResult = None
+		self.clientWorkLoadResultDict = dict()
+		self.resultWithMaxResponses = None
+
 	def run():
 		c = logical_clock()
-		send(('configuration_request',clientNumber), to=olympus)
-		output('Client %i asking for configuration from  Olympus'%(clientNumber,), sep = str_exp, level = log_level)
-		await(some(received(('configuration_response' , _, _, _, c2),from_=olympus), has = c2 >=c))
-		
+		send(('configuration_request', clientNumber), to=olympus)
+		output('Client %i asking for configuration from  Olympus' %
+		       (clientNumber,), sep=str_exp, level=log_level)
+		await(some(received(('configuration_response', _, _, _, c2), from_=olympus), has=c2 >= c))
+
 		for load in self.workload:
 			key = load.key
 			value = load.value
 			operationName = load.action
-			operationId = operationId+1
+			operationId = operationId + 1
 			c = logical_clock()
-			
-			
-			send(('getconfiguration',clientNumber), to=olympus)
+
+			send(('getconfiguration', clientNumber), to=olympus)
 			if await(isConfigurationValid):
 				isValidResponse = False
 				numberOfResponses = 0
 				successfulResponseResultCountDict = dict()
-				maxResponsesPerResult=0
-				
-				
-				send(('client_operation_request',operationName,key,value,self,operationId,c,clientNumber),to=head)
-				output('Client %i sent (operationName,operationId,key,value):(%s,%s,%s,%s) to head'%(clientNumber,operationName,operationId,key,value), sep = str_exp, level = log_level)
+				maxResponsesPerResult = 0
+
+				send(('client_operation_request', operationName, key,
+                                    value, self, operationId, c, clientNumber), to=head)
+				output('Client %i sent (operationName,operationId,key,value):(%s,%s,%s,%s) to head' % (
+					clientNumber, operationName, operationId, key, value), sep=str_exp, level=log_level)
 				if await(isValidResponse):
-					output('Client:%i received VALID result'%(clientNumber,), sep = str_exp, level = log_level)
-					
-					modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
-					continue 
+					output('Client:%i received VALID result' %
+					       (clientNumber,), sep=str_exp, level=log_level)
+
+					modifyDictionary(resultWithMaxResponses,
+					                 clientWorkLoadResultDict, operationName, key, value)
+					continue
 
 				elif timeout(client_timeout):
-					output("Client :%i Failed to receive the response in time, sending request to all replicas"%(clientNumber,),sep = str_exp, level = log_level)
+					output("Client :%i Failed to receive the response in time, sending request to all replicas" % (
+						clientNumber,), sep=str_exp, level=log_level)
 					while(1):
 						numberOfResponses = 0
 						successfulResponseResultCountDict = dict()
-						maxResponsesPerResult=0
-						send(('getconfiguration',clientNumber), to=olympus)
+						maxResponsesPerResult = 0
+						send(('getconfiguration', clientNumber), to=olympus)
 						if await(isConfigurationValid):
-							send(('client_retransmission_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
-							if await(numberOfResponses ==2*t+1):
-								output("Client :%i received :%i responses from replicas"%(clientNumber,numberOfResponses,), sep = str_exp, level = log_level)
-								if(maxResponsesPerResult >= t +1):
-									output("Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses), sep = str_exp, level = log_level)
-									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
+							send(('client_retransmission_request', operationName, key, value,
+                                                            self, operationId, logical_clock(), clientNumber), to=replicas)
+							if await(numberOfResponses == 2 * t + 1):
+								output("Client :%i received :%i responses from replicas" %
+								       (clientNumber, numberOfResponses,), sep=str_exp, level=log_level)
+								if(maxResponsesPerResult >= t + 1):
+									output("Client :%i received :%i correct quorum of correct result:%s from replicas" % (
+										clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
+									modifyDictionary(resultWithMaxResponses,
+									                 clientWorkLoadResultDict, operationName, key, value)
 									break
 								else:
-									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult), sep = str_exp, level = log_level)
+									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration" % (
+										clientNumber, maxResponsesPerResult), sep=str_exp, level=log_level)
 									initiateReconfigurationRequest(clientNumber)
-					
-									
 
 							elif timeout(client_timeout):
-								output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration"%(clientNumber), sep = str_exp, level = log_level)
+								output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration" % (
+									clientNumber), sep=str_exp, level=log_level)
 
 								initiateReconfigurationRequest(clientNumber)
-								
-								if(maxResponsesPerResult >= t +1):
-									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses), sep = str_exp, level = log_level)
-									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
+
+								if(maxResponsesPerResult >= t + 1):
+									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas" % (
+										clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
+									modifyDictionary(resultWithMaxResponses,
+									                 clientWorkLoadResultDict, operationName, key, value)
 									break
-							
-								
-								
 
 						elif timeout(client_timeout):
-							output('Client :%i hasnot received valid configuration from olympus'%(clientNumber), sep = str_exp, level = log_level)
+							output('Client :%i hasnot received valid configuration from olympus' %
+							       (clientNumber), sep=str_exp, level=log_level)
 							break
-			
+
 			elif timeout(client_timeout):
-				output('Client :%i hasnot received valid configuration from olympus'%(clientNumber), sep = str_exp, level = log_level)
+				output('Client :%i hasnot received valid configuration from olympus' %
+				       (clientNumber), sep=str_exp, level=log_level)
 
 				break
-			
-		output('client %i workload output:%s'%(clientNumber,clientWorkLoadResultDict), sep = str_exp, level = log_level)
-		testCases.verify(clientNumber,clientWorkLoadResultDict)
-		
-		send(('done',self,clientNumber,clientWorkLoadResultDict), to=parent())
+
+		output('client %i workload output:%s' %
+		       (clientNumber, clientWorkLoadResultDict), sep=str_exp, level=log_level)
+		testCases.verify(clientNumber, clientWorkLoadResultDict)
+
+		send(('done', self, clientNumber, clientWorkLoadResultDict), to=parent())
 		await(received(('done',), from_=parent()))
-		output('client:%i received done from master'%(clientNumber), sep = str_exp, level = log_level)
-		output('client:%i sending done to olympus'%(clientNumber), sep = str_exp, level = log_level)
-		send(('done',self,clientNumber), to=olympus)
-		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
-	
-	def modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value):
+		output('client:%i received done from master' %
+		       (clientNumber), sep=str_exp, level=log_level)
+		output('client:%i sending done to olympus' %
+		       (clientNumber), sep=str_exp, level=log_level)
+		send(('done', self, clientNumber), to=olympus)
+		output('Client %i terminating' %
+		       (clientNumber), sep=str_exp, level=log_level)
+
+	def modifyDictionary(resultWithMaxResponses, clientWorkLoadResultDict, operationName, key, value):
 		if(resultWithMaxResponses == 'OK'):
-			operation = Operation(operationName,key,value)
+			operation = Operation(operationName, key, value)
 			result = operation.performOperation(clientWorkLoadResultDict)
-			
-	
-	def receive(msg= ('client_operation_response',receivedOperationName,receivedOperationId,result,resultProof,c,sender),from_=_tail):
+
+	def receive(msg=('client_operation_response', receivedOperationName, receivedOperationId, result, resultProof, c, sender), from_=_tail):
 		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
-		output('Client:%i received result:%s from %s'%(clientNumber,result,sender), sep = str_exp, level = log_level)
-		isValidResponse = validations.responseReceivedWithCorrectOperation(operationName,operationId,receivedOperationName,receivedOperationId)
-		output('Client:%i is operation valid: %s'%(clientNumber, str(isValidResponse)), sep = str_exp, level = log_level)
-		(isResultValid,reason) = validations.validationOfResultProof(result,resultProof,replicaPublicList,self)
-		output('Client:%i %s'%(clientNumber,str(reason)), sep = str_exp, level = log_level)
+		output('Client:%i received result:%s from %s' %
+		       (clientNumber, result, sender), sep=str_exp, level=log_level)
+		isValidResponse = validations.responseReceivedWithCorrectOperation(
+			operationName, operationId, receivedOperationName, receivedOperationId)
+		output('Client:%i is operation valid: %s' %
+		       (clientNumber, str(isValidResponse)), sep=str_exp, level=log_level)
+		(isResultValid, reason) = validations.validationOfResultProof(
+			result, resultProof, replicaPublicList, self)
+		output('Client:%i %s' % (clientNumber, str(reason)),
+		       sep=str_exp, level=log_level)
 		isValidResponse = isValidResponse and isResultValid
-		numberOfResponses = numberOfResponses+1
+		numberOfResponses = numberOfResponses + 1
 		if isValidResponse:
 			if result in successfulResponseResultCountDict:
-				successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] +1 
+				successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] + 1
 			else:
 				successfulResponseResultCountDict[result] = 1
-				
+
 			if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
 				maxResponsesPerResult = successfulResponseResultCountDict[result]
 				resultWithMaxResponses = result
-				
+
 	def initiateReconfigurationRequest(index):
 		isConfigurationValid = False
-		send(('reconfiguration_request',index),to = olympus)
-						
-		
-	def receive(msg= ('getconfiguration_response',isValid),from_=_olympus):
+		send(('reconfiguration_request', index), to=olympus)
+
+	def receive(msg=('getconfiguration_response', isValid), from_=_olympus):
 		isConfigurationValid = isValid
-			
-		
-	def receive(msg= ('configuration_response',replicas,head,tail,c),from_=_olympus):
-		output('Client %i received configuration_response from olympus'%(clientNumber,), sep = str_exp, level = log_level)
+
+	def receive(msg=('configuration_response', replicas, head, tail, c), from_=_olympus):
+		output('Client %i received configuration_response from olympus' %
+		       (clientNumber,), sep=str_exp, level=log_level)
 		self.head = head
 		self.tail = tail
 		self.replicas = replicas
-		
-	
