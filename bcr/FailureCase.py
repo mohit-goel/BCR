@@ -36,7 +36,9 @@ class FailureCase:
         elif action == "change_result":
             self.failureChecks.change_result = True 
         elif action == "drop_result_stmt":
-            self.failureChecks.drop_result_stmt = True    
+            self.failureChecks.drop_result_stmt = True
+        elif action == "change_privatekey":
+            self.failureChecks.change_privatekey = True   
  
     def __str__(self):
      return  str(self.failure)

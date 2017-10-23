@@ -14,7 +14,7 @@ failures[0,1] = shuttle(0,1), drop_result_stmt()
 
 -------------------------t = 1, client = 1, failure = 0 ----------------------------------------
 
-test_case_name = test_t1c1f0_1
+test_case_name = test_1
 t = 1
 num_client = 1
 client_timeout = 3000
@@ -27,7 +27,7 @@ Dict States: 1. { 'movie': ['star'] }
 Result: OK
 
 
-test_case_name = test_t1c1f0_2
+test_case_name = test_2
 t = 1
 num_client = 1
 client_timeout = 3000
@@ -39,7 +39,7 @@ Description: 1 client, 3 replicas. Client sends operation. Head receives operati
 Dict States: {} , Result: ''
 
 
-test_case_name = test_t1c1f0_3
+test_case_name = test_3
 t = 1
 num_client = 1
 client_timeout = 3000
@@ -52,7 +52,7 @@ Dict State: {}  , Result: fail
 
 
 
-test_case_name = test_t1c1f0_4
+test_case_name = test_4
 t = 1
 num_client = 1
 client_timeout = 3000
@@ -82,10 +82,10 @@ num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star'); append('movie','stars')
+workload[0] = put('movie','star'); append('movie',' wars')
 
 Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle.
-Dict: 'movie': ['star', 'stars'] , Result: OK, OK
+Dict: 'movie': ['star', 'star wars'] , Result: OK, OK
 
 
 test_case_name = test_t1c1f0_7
@@ -94,10 +94,10 @@ num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star'); slice('movie','1:4')
+workload[0] = put('movie','World wars'); slice('movie','1:4')
 
-Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle. 2ndResult is fail because index out of range.
-Dict: 'movie': ['star'] , Result: OK, fail
+Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle. .
+Dict: 'movie': ['orl'] , Result: OK, OK
 
 
 test_case_name = test_t1c1f0_8
@@ -106,10 +106,10 @@ num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star'); append('movie','stars'); get('movie')
+workload[0] = put('movie','star'); append('movie',' wars'); get('movie')
 
 Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle.
-Dict: 'movie': ['star', 'stars'] , Result: OK, OK, ['star', 'stars']
+Dict: 'movie': ['star wars'] , Result: OK, OK, ['star wars']
 
 
 test_case_name = test_t1c1f0_9
@@ -118,10 +118,10 @@ num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star');append('movie','stars'); slice('movie','1:4')
+workload[0] = put('movie','star');append('movie',' wars'); slice('movie','8:10')
 
-Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle.
-Dict: 'movie': ['stars'] , Result: OK, OK, OK
+Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle. 3rd Result is fail because index out of range
+Dict: 'movie': ['star wars'] , Result: OK, OK, fail
 
 
 test_case_name = test_t1c1f0_10
@@ -130,10 +130,10 @@ num_client = 1
 client_timeout = 3000
 head_timeout = 3000
 nonhead_timeout = 3000
-workload[0] = put('movie','star'); slice('movie','0:4')
+workload[0] = append('movie','star'); slice('movie','0:4')
 
-Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle.
-Dict: 'movie': ['star'] , Result: OK, OK
+Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle. Both results fail because key doesnt exist
+Dict: {} , Result: fail, fail
 
 -------------------------t = 2, client = 1, failure = 0 ----------------------------------------
 
@@ -526,13 +526,13 @@ Dict: 'movie': ['star'] , Result: OK, OK
 
 ***************************************************
 
--------------------------t = 2, client = 2, failure = 1 ----------------------------------------
+-------------------------t = 1, client = 2, failure = 1 ----------------------------------------
 
 
 
 
-test_case_name = test_t2c2f1_1
-t = 2
+test_case_name = test_t1c2f1_1
+t = 1
 num_client = 2
 client_timeout = 3000
 head_timeout = 3000
@@ -541,12 +541,12 @@ workload[0] = put('movie','star'); slice('movie','1:4')
 workload[1] = put('movie','stars')
 failures[0,0] = client_request(0,0), change_operation()
 
-Description: 1 client, 3 replicas. Client sends put. Head receives put and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
-Dict: 'movie': ['star'] , Result: OK
+Description: 1 client, 3 replicas. Clients send operations. When Head receives operation client_request(0,0) it modifies forward shuttle and sends it. Replica:1 detects fault and sends reconfiguration request. If client 1 sends before client 0, then its shuttle passes through all replicas and gets result shuttle. If client 0 sends before client 1, then replica:1 doesn't accept any more requests from any client because slots would not be continuous. Both clients would retransmit request and time-out and then send reconfiguration request to olympus
 
 
-test_case_name = test_t2c2f1_2
-t = 2
+
+test_case_name = test_t1c2f1_2
+t = 1
 num_client = 2
 client_timeout = 3000
 head_timeout = 3000
@@ -555,12 +555,10 @@ workload[0] = put('movie','star'); slice('movie','1:4')
 workload[1] = put('movie','stars'); get('movie')
 failures[0,1] = shuttle(0,0), change_operation()
 
-Description: 1 client, 3 replicas. Client sends operation. Head receives get and verifies dict, sends empty string in forward shuttle. All other replicas verify their dict and append result(empty string) to forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
-
-Dict: {} , Result: fail
+Description: 2 client, 3 replicas. Client sends operation. When Replica 1 receives Forward Shuttle:0 for Client:0, it modifies forward shuttle and sends it. Replica:2 detects fault and sends reconfiguration request. If client 1 sends before client 0, then its shuttle passes through all replicas and gets result shuttle. If client 0 sends before client 1, then replica:2 doesn't accept any more requests from any client because slots would not be continuous. Both clients would retransmit request and time-out and then send reconfiguration request to olympus
 
 
-test_case_name = test_t2c2f1_3
+test_case_name = test_t1c2f1_3
 t = 1
 num_client = 2
 client_timeout = 3000
@@ -570,9 +568,7 @@ workload[0] = put('movie','star'); slice('movie','1:4')
 workload[1] = get('movie'); put('movie','stars')
 failures[0,2] = shuttle(0,0), change_result()
 
-Description: 1 client, 3 replicas. Client sends append. Head receives append and verifies dict, sends fail as result in forward shuttle. All other replicas verify their dict and send fail in forward Shuttle. Tail sends result shuttle to client and sends Result Shuttle to other replicas. Client verifies result shuttle. 
-Dict: {} , Result: fail
-
+Description: 2 client, 3 replicas. Client sends operation. When Replica 1 receives Forward Shuttle:0 for Client:0, it modifies forward shuttle and sends it. Replica:2 detects fault and sends reconfiguration request. If client 1 sends before client 0, then its shuttle passes through all replicas and gets result shuttle. If client 0 sends before client 1, then replica:2 doesn't accept any more requests from any client because slots would not be continuous. Both clients would retransmit request and time-out and then send reconfiguration request to olympus
 
 
 test_case_name = test_t2c2f1_4

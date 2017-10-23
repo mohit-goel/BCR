@@ -59,7 +59,8 @@ class Replica(process):
 		
 		operation = Operation(operationName,key,value)
 		result = operation.performOperation(runningState)
-		
+		replicakeyPrivate = replicaPrivate
+		replicakeyPublic = None
 		resultDict[(operationId,client)] = result
 		
 		replicaHistory.insertOperation((operationName,operationId,client),result,slot)	
@@ -67,21 +68,26 @@ class Replica(process):
 		
 		if (self.failureChecks.change_operation == True) and (self.isTail == False) :
 			operationName = 'get'
-			output('operation modified for forward shuttle in Replica:%i' % index)
+			output('operation modified for forward shuttle in Replica:%i' % (index), sep = str_exp, level = log_level)
 			self.failureChecks.change_operation = False
 			#key = 'x'
 			#value = None
+		if (self.failureChecks.change_privatekey == True):
+			(replicakeyPrivate, replicakeyPublic) = crypto.getSignedKey()
+			output('private key modified for forward shuttle in Replica:%i' % (index), sep = str_exp, level = log_level)
+			self.failureChecks.change_privatekey = False
+			
 		output('result of operation is %s for Replica:%i' %(result,index))
 		orderStatement = OrderStatement(slot,operationName,operationId,index)
 		output('Replica:%i order statement [slot,operationName,operationId,replicaId]:%s is signed,appended to order Proof' %(index,orderStatement))
-		signedSerializedOrderStatements = crypto.sign(replicaPrivate,orderStatement)
+		signedSerializedOrderStatements = crypto.sign(replicakeyPrivate,orderStatement)
 		shuttle.addOrderStatement(signedSerializedOrderStatements)
 		#output('order proof of Replica:%i is %s' %(index, shuttle.orderProof))
 
 		resultHash = crypto.getHash(result)
 		resultStatement = ResultStatement(resultHash,operationName,operationId,index)
 		output('Replica:%i result statement [result_hash,operationName,operationId,replicaId]:%s is signed,appended to result Proof' %(index,resultStatement))
-		signedSerializedResultStatements = crypto.sign(replicaPrivate,resultStatement)
+		signedSerializedResultStatements = crypto.sign(replicakeyPrivate,resultStatement)
 		shuttle.addResultStatement(signedSerializedResultStatements)
 		
 	def run():
@@ -115,6 +121,7 @@ class Replica(process):
 			currentEncodedSt = resultstmtlist[index]
 			currentKey = replicaPublicList[index];
 			decodeSt = crypto.isSignatureVerified(currentKey,currentEncodedSt)
+			decodeSt.result = 'OK'
 			decodeSt.result = crypto.getHash(decodeSt.result)
 			signedSerializedResultStatements = crypto.sign(replicaPrivate,decodeSt)
 			resultstmtlist[index] = signedSerializedResultStatements
@@ -241,8 +248,8 @@ class Replica(process):
 
 
 	def validateBackwardShuttle(operationId,slot,client,shuttle):
-		isResultValid = validations.validationOfResultProof(resultDict[(operationId,client)],shuttle.resultProof,replicaPublicList)
-		#output('Replica:%i  Backward Shuttle valid:%s'%(index,str(isResultValid)))
+		(isResultValid,reason) = validations.validationOfResultProof(resultDict[(operationId,client)],shuttle.resultProof,replicaPublicList,self)
+		output('%s for Replica:%i'%(str(reason),index))
 		return isResultValid
 
 			

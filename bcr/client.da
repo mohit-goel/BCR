@@ -74,7 +74,7 @@ class Client(process):
 					continue 
 
 				elif timeout(client_timeout):
-					output("Client :%i Failed to receive the response in time, sending request to all replicas"%(clientNumber,))
+					output("Client :%i Failed to receive the response in time, sending request to all replicas"%(clientNumber,),sep = str_exp, level = log_level)
 					while(1):
 						numberOfResponses = 0
 						successfulResponseResultCountDict = dict()
@@ -83,42 +83,46 @@ class Client(process):
 						if await(isConfigurationValid):
 							send(('client_retransmission_request',operationName,key,value,self,operationId,logical_clock(),clientNumber),to=replicas)
 							if await(numberOfResponses ==2*t+1):
-								output("Client :%i received :%i responses from replicas"%(clientNumber,numberOfResponses,))
+								output("Client :%i received :%i responses from replicas"%(clientNumber,numberOfResponses,), sep = str_exp, level = log_level)
 								if(maxResponsesPerResult >= t +1):
-									output("Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
+									output("Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses), sep = str_exp, level = log_level)
 									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 									break
 								else:
-									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult))
+									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration"%(clientNumber,maxResponsesPerResult), sep = str_exp, level = log_level)
 									initiateReconfigurationRequest(clientNumber)
 					
 									
+
 							elif timeout(client_timeout):
-								output("Failed to receive the response from all the replicas.Initiating reconfiguration")
+								output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration"%(clientNumber), sep = str_exp, level = log_level)
+
 								initiateReconfigurationRequest(clientNumber)
 								
 								if(maxResponsesPerResult >= t +1):
-									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses))
+									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas"%(clientNumber,maxResponsesPerResult,resultWithMaxResponses), sep = str_exp, level = log_level)
 									modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 									break
 							
 								
 								
+
 						elif timeout(client_timeout):
-							output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
+							output('Client :%i hasnot received valid configuration from olympus'%(clientNumber), sep = str_exp, level = log_level)
 							break
 			
 			elif timeout(client_timeout):
-				output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
+				output('Client :%i hasnot received valid configuration from olympus'%(clientNumber), sep = str_exp, level = log_level)
+
 				break
 			
-		output('client %i workload output:%s'%(clientNumber,clientWorkLoadResultDict))
+		output('client %i workload output:%s'%(clientNumber,clientWorkLoadResultDict), sep = str_exp, level = log_level)
 		testCases.verify(clientNumber,clientWorkLoadResultDict)
 		
 		send(('done',self,clientNumber,clientWorkLoadResultDict), to=parent())
 		await(received(('done',), from_=parent()))
-		output('client received done from master')
-		output('client sending done to olympus')
+		output('client:%i received done from master'%(clientNumber), sep = str_exp, level = log_level)
+		output('client:%i sending done to olympus'%(clientNumber), sep = str_exp, level = log_level)
 		send(('done',self,clientNumber), to=olympus)
 		output('Client %i terminating'%(clientNumber), sep = str_exp, level = log_level)
 	
@@ -132,9 +136,9 @@ class Client(process):
 		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
 		output('Client:%i received result:%s from %s'%(clientNumber,result,sender), sep = str_exp, level = log_level)
 		isValidResponse = validations.responseReceivedWithCorrectOperation(operationName,operationId,receivedOperationName,receivedOperationId)
-		output('Client:%i is operation valid: %s'%(clientNumber, str(isValidResponse)))
-		isResultValid = validations.validationOfResultProof(result,resultProof,replicaPublicList)
-		output('Client:%i is result valid: %s'%(clientNumber,str(isResultValid)))
+		output('Client:%i is operation valid: %s'%(clientNumber, str(isValidResponse)), sep = str_exp, level = log_level)
+		(isResultValid,reason) = validations.validationOfResultProof(result,resultProof,replicaPublicList,self)
+		output('Client:%i %s'%(clientNumber,str(reason)), sep = str_exp, level = log_level)
 		isValidResponse = isValidResponse and isResultValid
 		numberOfResponses = numberOfResponses+1
 		if isValidResponse:

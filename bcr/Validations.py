@@ -1,6 +1,11 @@
 from State import  State
 from Crypto import Crypto
+
+import logging
+
+
 class Validations:
+   
     
 
     def __init__(self):
@@ -14,10 +19,9 @@ class Validations:
         else:
             return True
         
-    def validationOfResultProof(self,result,resultProof,replicaPublicList):
+    def validationOfResultProof(self,result,resultProof,replicaPublicList,proc):
         if len(resultProof.getlistOfResultSt()) < (len(replicaPublicList)) :
-            print("Result Proof validation fail: Result Statement of some replica missing")
-            return False
+            return (False,"Result Proof validation fail: Result Statement of some replica missing")
         
         resultStList = resultProof.getlistOfResultSt()
         for i in range(len(resultStList)):
@@ -25,14 +29,12 @@ class Validations:
             currentKey = replicaPublicList[i];
             decodeSt = self.crypto.isSignatureVerified(currentKey,currentEncodedSt)
             if (decodeSt is None):
-                print("Result proof validation fail: Signature not verified")
-                return False
+                return (False, "Result proof validation fail: Signature not verified")
                 
             if(not self.crypto.verifyHashes(result, decodeSt.result)):
-                print("Result proof validation fail: Result doesn't match Result Stmt of some replica")
-                return False
+                return (False,"Result proof validation fail: Result doesn't match Result Stmt of some replica")
        
-        return True
+        return (True,"Result Proof is valid")
     
     def responseReceivedWithCorrectOperation(self,operationName,operationId,receivedOperationName,receivedOperationId):
         return (operationName == receivedOperationName) and (operationId == receivedOperationId)
