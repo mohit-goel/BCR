@@ -22,12 +22,11 @@ from Operation import Operation
 import pickle
 str_exp = ','
 log_level =20
-cl = import_da('client')	
 ol = import_da('olympus')
 
 class Replica(process):
 
-	def setup(olympus:ol.Olympus,state:State,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list):
+	def setup(olympus:ol.Olympus,state:State,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list,nonhead_timeout:int):
 		self.isHead = False
 		self.isTail = False
 		self.prevReplica = None
@@ -105,7 +104,7 @@ class Replica(process):
 		if await(replicaHistory.isResultShuttleArrivedForOperation((operationName,operationId,client))):
 			generateResponseFromResultShuttle(operationName,key,value,client,operationId,clock,clientNumber)
 							
-		elif timeout(180):
+		elif timeout(nonhead_timeout):
 			output('Replica:%i timeout out waiting for backward shuttle client:%s'%(index,client), sep = str_exp, level = log_level)
 			send(('reconfiguration_request',index),to = olympus)
 	

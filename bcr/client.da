@@ -16,10 +16,11 @@ from TestCases import TestCases
 import pickle
 str_exp = ','
 log_level =20
+ol = import_da('olympus')
 class Client(process):
 
 
-	def setup(olympus:Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int,testCases:TestCases):
+	def setup(olympus:ol.Olympus,clientNumber:int,signedKey:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,replicaPublic:list,workload:list,numberOfFailures:int,testCases:TestCases,client_timeout:int):
 		self.q = []
 		self.head = None
 		self.tail=None
@@ -72,7 +73,7 @@ class Client(process):
 					modifyDictionary(resultWithMaxResponses,clientWorkLoadResultDict,operationName,key,value)
 					continue 
 
-				elif timeout(60):
+				elif timeout(client_timeout):
 					output("Client :%i Failed to receive the response in time, sending request to all replicas"%(clientNumber,))
 					while(1):
 						numberOfResponses = 0
@@ -92,7 +93,7 @@ class Client(process):
 									initiateReconfigurationRequest(clientNumber)
 					
 									
-							elif timeout(120):
+							elif timeout(client_timeout):
 								output("Failed to receive the response from all the replicas.Initiating reconfiguration")
 								initiateReconfigurationRequest(clientNumber)
 								
@@ -103,11 +104,11 @@ class Client(process):
 							
 								
 								
-						elif timeout(120):
+						elif timeout(client_timeout):
 							output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
 							break
 			
-			elif timeout(120):
+			elif timeout(client_timeout):
 				output('Client :%i hasnot received valid configuration from olympus'%(clientNumber))
 				break
 			

@@ -18,10 +18,11 @@ log_level =20
 cl = import_da('client')	
 rl = import_da('replica')
 
+
 class Olympus(process):
 
 	
-	def setup(nReplicas:int,clients:cl.Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list,failures:dict):
+	def setup(nReplicas:int,clients:cl.Client,olympusPrivate:nacl.signing.SigningKey,olympusPublic:nacl.signing.SigningKey,clientPublic:list,replicaPublic:list,replicaPrivate:list,failures:dict,nonhead_timeout:int):
 		self.head = None
 		self.tail = None
 		self.replicas = []
@@ -45,7 +46,7 @@ class Olympus(process):
 		self.head = replicas[0]
 		self.tail = replicas[nReplicas-1]
 		running_State = dict()
-		setup(replicas,(self,State.PENDING.value,olympusPublic,clientPublic,replicaPublicKeysList,replicaPrivateKeysList))
+		setup(replicas,(self,State.PENDING.value,olympusPublic,clientPublic,replicaPublicKeysList,replicaPrivateKeysList,nonhead_timeout))
 		start(replicas)
 		c = logical_clock()
 		for i in range(nReplicas):

@@ -1,3 +1,4 @@
+import re
 class Operation:
     def __init__(self, operationName,key, value):
         self.operationName = operationName

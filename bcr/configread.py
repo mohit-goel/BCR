@@ -13,7 +13,7 @@ class configread:
         self.client_host = dict()
         self.replica_host = dict()
         self.failure = dict()
-        self.pseudorandom_workload = []
+        self.pseudorandom_workload =dict()
         
         with open(input_file) as f:
             for line in f:
@@ -31,11 +31,11 @@ class configread:
                         elif line.startswith('num_client'):
                             self.num_client = int(val)
                         elif line.startswith('client_timeout'):
-                            self.client_timeout = int(val)
+                            self.client_timeout = int(val)/1000
                         elif line.startswith('head_timeout'):
-                            self.head_timeout = int(val)
+                            self.head_timeout = int(val)/1000
                         elif line.startswith('nonhead_timeout'):
-                            self.nonhead_timeout = int(val)
+                            self.nonhead_timeout = int(val)/1000
                         elif line.startswith('hosts'):
                             pattern = re.split(';', val)
                             pattern = [int(x.strip()) for x in pattern]
@@ -58,6 +58,8 @@ class configread:
                                 self.replica_host[i] = x
                                 i = i+1
                         elif line.startswith('pseudorandom_workload'):
+                            i = int(re.search(r'\d+', key).group())
+                            self.pseudorandom_workload[i] = []
                             pattern = re.split(';', val)
                             pattern = [x.strip() for x in pattern]
                             for x in pattern:
@@ -66,7 +68,7 @@ class configread:
                                 x = x.replace("(", ",")
                                 object = re.split(',', x)
                                 y = WorkloadObj(object)
-                                self.pseudorandom_workload.append(y)
+                                self.pseudorandom_workload[i].append(y)
                             
                             
                         elif line.startswith('workload'):
@@ -81,7 +83,7 @@ class configread:
                                 object = re.split(',', x)
                                 y = WorkloadObj(object)
                                 if y.action == 'pseudorandom':
-                                    list = self.pseudoRandom.select_random_elements_of_list(self.pseudorandom_workload,int(y.value),int(y.key))
+                                    list = self.pseudoRandom.select_random_elements_of_list(self.pseudorandom_workload[i],int(y.value),int(y.key))
                                     for x in list:
                                         self.workload[i].append(x)
                                         

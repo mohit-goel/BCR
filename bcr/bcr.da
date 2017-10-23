@@ -15,6 +15,7 @@ from ReplicaHistory import ReplicaHistory
 import pickle
 from configread import configread
 from TestCases import TestCases
+from Operation import Operation
 str_exp = ','
 log_level =20
 cl = import_da('client')	
@@ -57,11 +58,20 @@ def main():
 	clients = list(clients)
 	masterDict = dict()
 	testCases = TestCases(config.test_case_name,masterDict)
+	
 	olympus = new(ol.Olympus,num= 1)
 	for i in range(nclients):
-		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i],config.failure_num,testCases))
+		masterDict = dict()
+		if config.test_case_name == 'stresstest':
+			work = config.workload[i]
+			for load in work:
+				operation = Operation(load.action,load.key,load.value)
+				operation.performOperation(masterDict)
+			testCases = TestCases(config.test_case_name,masterDict)
+			
+		setup(clients[i],(olympus,i,clientPrivate[i],olympusPublic,replicaPublic,config.workload[i],config.failure_num,testCases,config.client_timeout))
 	
-	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate,config.failure))
+	setup(olympus, (nReplicas,clients,olympusPrivate,olympusPublic,clientPublic,replicaPublic,replicaPrivate,config.failure,config.nonhead_timeout))
 	start(olympus)
 	start(clients)
 	
