@@ -53,12 +53,12 @@ def main():
 	output('replica public keys')
 	output(' %s' % (replicaPublic,))
 
-	clients = new(cl.Client, num=nclients,at='ClientNode')
+	clients = new(cl.Client, num=nclients)
 	clients = list(clients)
 	masterDict = dict()
 	testCases = TestCases(config.test_case_name, masterDict)
 
-	olympus = new(ol.Olympus, num=1,at='OlympusNode')
+	olympus = new(ol.Olympus, num=1)
 	for i in range(nclients):
 		masterDict = dict()
 		if config.test_case_name == 'stresstest':
