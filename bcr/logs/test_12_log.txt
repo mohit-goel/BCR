@@ -1,0 +1,200 @@
+[2017-10-22 22:39:41,029] da.api<MainProcess>:INFO: <Node_:a5001> initialized at 127.0.0.1:(UdpTransport=26452, TcpTransport=28820).
+[2017-10-22 22:39:41,029] da.api<MainProcess>:INFO: Starting program <module 'bcr' from '/Users/nikithakandru/Desktop/Async/BCR/bcr/bcr.py'>...
+[2017-10-22 22:39:41,029] da.api<MainProcess>:INFO: Running iteration 1 ...
+[2017-10-22 22:39:41,030] da.api<MainProcess>:INFO: Waiting for remaining child processes to terminate...(Press "Ctrl-C" to force kill)
+[2017-10-22 22:39:41,032] bcr.Node_<Node_:a5001>:OUTPUT: configuration parameters are read from file
+[2017-10-22 22:39:41,033] bcr.Node_<Node_:a5001>:OUTPUT: replica private keys
+[2017-10-22 22:39:41,033] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.SigningKey object at 0x1033c3fd0>, <nacl.signing.SigningKey object at 0x1033e1080>, <nacl.signing.SigningKey object at 0x1033e10f0>]
+[2017-10-22 22:39:41,033] bcr.Node_<Node_:a5001>:OUTPUT: replica public keys
+[2017-10-22 22:39:41,033] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.VerifyKey object at 0x1033e1048>, <nacl.signing.VerifyKey object at 0x1033e10b8>, <nacl.signing.VerifyKey object at 0x1033e1128>]
+[2017-10-22 22:39:41,103] olympus.Olympus<Olympus:fb804>:INFO: Starting Olympus
+[2017-10-22 22:39:41,108] client.Client<Client:fb802>:INFO: Client 0 asking for configuration from  Olympus
+[2017-10-22 22:39:41,108] client.Client<Client:fb803>:INFO: Client 1 asking for configuration from  Olympus
+[2017-10-22 22:39:41,161] replica.Replica<Replica:fb807>:INFO: Starting Replica
+[2017-10-22 22:39:41,162] replica.Replica<Replica:fb806>:INFO: Starting Replica
+[2017-10-22 22:39:41,163] replica.Replica<Replica:fb805>:INFO: Starting Replica
+[2017-10-22 22:39:41,164] olympus.Olympus<Olympus:fb804>:INFO: Message inithist sent to replica 0
+[2017-10-22 22:39:41,164] replica.Replica<Replica:fb807>:INFO: replica 0 received inithist from olympus
+[2017-10-22 22:39:41,165] olympus.Olympus<Olympus:fb804>:INFO: Message inithist sent to replica 1
+[2017-10-22 22:39:41,165] replica.Replica<Replica:fb807>:INFO: Replica 0 is head
+[2017-10-22 22:39:41,165] olympus.Olympus<Olympus:fb804>:INFO: Message inithist sent to replica 2
+[2017-10-22 22:39:41,165] olympus.Olympus<Olympus:fb804>:INFO: Olympus received configuration_request from client 0
+[2017-10-22 22:39:41,165] olympus.Olympus<Olympus:fb804>:INFO: Olympus received configuration_request from client 1
+[2017-10-22 22:39:41,166] replica.Replica<Replica:fb806>:INFO: replica 1 received inithist from olympus
+[2017-10-22 22:39:41,167] replica.Replica<Replica:fb805>:INFO: replica 2 received inithist from olympus
+[2017-10-22 22:39:41,167] replica.Replica<Replica:fb805>:INFO: Replica 2 is tail
+[2017-10-22 22:39:41,168] olympus.Olympus<Olympus:fb804>:INFO: Olympus sending configuration response to client 1
+[2017-10-22 22:39:41,169] olympus.Olympus<Olympus:fb804>:INFO: Olympus sending configuration response to client 0
+[2017-10-22 22:39:41,170] client.Client<Client:fb803>:INFO: Client 1 received configuration_response from olympus
+[2017-10-22 22:39:41,171] client.Client<Client:fb802>:INFO: Client 0 received configuration_response from olympus
+[2017-10-22 22:39:41,173] client.Client<Client:fb803>:INFO: Client 1 sent (operationName,operationId,key,value):(put,1,movie,stars) to head
+[2017-10-22 22:39:41,174] replica.Replica<Replica:fb807>:INFO: Replica:0 received client_operation_request:0 from client:1 
+[2017-10-22 22:39:41,174] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{1: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:41,174] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 0 in Replica:0
+[2017-10-22 22:39:41,175] replica.Replica<Replica:fb807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:put OperationId:1 ]
+[2017-10-22 22:39:41,175] replica.Replica<Replica:fb807>:OUTPUT: result of operation is OK for Replica:0
+[2017-10-22 22:39:41,176] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[0,put,1,0] is signed,appended to order Proof
+[2017-10-22 22:39:41,177] client.Client<Client:fb802>:INFO: Client 0 sent (operationName,operationId,key,value):(put,1,movie,star) to head
+[2017-10-22 22:39:41,178] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,0] is signed,appended to result Proof
+[2017-10-22 22:39:41,180] replica.Replica<Replica:fb807>:OUTPUT: Forward Shuttle sent from head for Client:1
+[2017-10-22 22:39:41,184] replica.Replica<Replica:fb807>:INFO: Replica:0 received client_operation_request:0 from client:0 
+[2017-10-22 22:39:41,186] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{1: {<MessageTypes.DIRECT: 0>: 0}, 0: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:41,187] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 0 in Replica:0
+[2017-10-22 22:39:41,187] replica.Replica<Replica:fb807>:INFO: [Replica:0 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 22:39:41,187] replica.Replica<Replica:fb807>:OUTPUT: result of operation is OK for Replica:0
+[2017-10-22 22:39:41,188] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[1,put,1,0] is signed,appended to order Proof
+[2017-10-22 22:39:41,189] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,0] is signed,appended to result Proof
+[2017-10-22 22:39:41,190] replica.Replica<Replica:fb806>:INFO: Replica:1 received forward shuttle:0 for client:1
+[2017-10-22 22:39:41,191] replica.Replica<Replica:fb807>:OUTPUT: Forward Shuttle sent from head for Client:0
+[2017-10-22 22:39:41,191] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,191] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:1
+[2017-10-22 22:39:41,192] replica.Replica<Replica:fb806>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:1
+[2017-10-22 22:39:41,192] replica.Replica<Replica:fb806>:INFO: [Replica:1 runningState:{'movie': 'stars'} OperationName:put OperationId:1 ]
+[2017-10-22 22:39:41,193] replica.Replica<Replica:fb806>:OUTPUT: result of operation is OK for Replica:1
+[2017-10-22 22:39:41,193] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[0,put,1,1] is signed,appended to order Proof
+[2017-10-22 22:39:41,194] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,1] is signed,appended to result Proof
+[2017-10-22 22:39:41,195] replica.Replica<Replica:fb806>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 22:39:41,196] replica.Replica<Replica:fb806>:INFO: Replica:1 received forward shuttle:0 for client:0
+[2017-10-22 22:39:41,196] replica.Replica<Replica:fb805>:INFO: Replica:2 received forward shuttle:0 for client:1
+[2017-10-22 22:39:41,197] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,197] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,197] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is shuttle(0,0),change_operation() , failure checks is  change_oper=True change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:1
+[2017-10-22 22:39:41,197] replica.Replica<Replica:fb805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:2
+[2017-10-22 22:39:41,197] replica.Replica<Replica:fb806>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:1
+[2017-10-22 22:39:41,198] replica.Replica<Replica:fb806>:INFO: [Replica:1 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 22:39:41,198] replica.Replica<Replica:fb806>:INFO: operation modified for forward shuttle in Replica:1
+[2017-10-22 22:39:41,198] replica.Replica<Replica:fb806>:OUTPUT: result of operation is OK for Replica:1
+[2017-10-22 22:39:41,198] replica.Replica<Replica:fb805>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:2
+[2017-10-22 22:39:41,198] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[1,get,1,1] is signed,appended to order Proof
+[2017-10-22 22:39:41,199] replica.Replica<Replica:fb805>:INFO: [Replica:2 runningState:{'movie': 'stars'} OperationName:put OperationId:1 ]
+[2017-10-22 22:39:41,199] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',get,1,1] is signed,appended to result Proof
+[2017-10-22 22:39:41,199] replica.Replica<Replica:fb805>:OUTPUT: result of operation is OK for Replica:2
+[2017-10-22 22:39:41,199] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[0,put,1,2] is signed,appended to order Proof
+[2017-10-22 22:39:41,200] replica.Replica<Replica:fb806>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 22:39:41,200] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,2] is signed,appended to result Proof
+[2017-10-22 22:39:41,202] replica.Replica<Replica:fb805>:OUTPUT: client result shuttle sent from tail to client:1
+[2017-10-22 22:39:41,203] client.Client<Client:fb803>:INFO: Client:1 received result:OK from <Replica:fb805>
+[2017-10-22 22:39:41,203] client.Client<Client:fb803>:INFO: Client:1 is operation valid: True
+[2017-10-22 22:39:41,204] replica.Replica<Replica:fb805>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 22:39:41,204] replica.Replica<Replica:fb806>:INFO: Replica:1 received backward shuttle:0 for client:1
+[2017-10-22 22:39:41,205] client.Client<Client:fb803>:INFO: Client:1 Result Proof is valid
+[2017-10-22 22:39:41,205] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{1: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,205] replica.Replica<Replica:fb805>:INFO: Replica:2 received forward shuttle:0 for client:0
+[2017-10-22 22:39:41,205] client.Client<Client:fb803>:INFO: Client:1 received VALID result
+[2017-10-22 22:39:41,205] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:1
+[2017-10-22 22:39:41,205] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,205] replica.Replica<Replica:fb805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:2
+[2017-10-22 22:39:41,206] client.Client<Client:fb803>:INFO: Client 1 sent (operationName,operationId,key,value):(get,2,movie,None) to head
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb805>:OUTPUT: Forward Shuttle validation fail: operationName of orderproof different
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb806>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb805>:OUTPUT: Forward Shuttle:0 for Client:0 failed validation at Replica:2
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb806>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:1
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb806>:INFO: [Replica:1 runningState:{'movie': 'star'} OperationName:put OperationId:1]
+[2017-10-22 22:39:41,206] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 sent reconfiguration_request to Olympus
+[2017-10-22 22:39:41,208] replica.Replica<Replica:fb807>:INFO: Replica:0 received client_operation_request:1 from client:1 
+[2017-10-22 22:39:41,208] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{1: {<MessageTypes.DIRECT: 0>: 1}, 0: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:41,208] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 1 in Replica:0
+[2017-10-22 22:39:41,208] replica.Replica<Replica:fb807>:INFO: [Replica:0 runningState:{'movie': 'star'} OperationName:get OperationId:2 ]
+[2017-10-22 22:39:41,209] replica.Replica<Replica:fb807>:OUTPUT: result of operation is star for Replica:0
+[2017-10-22 22:39:41,209] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[2,get,2,0] is signed,appended to order Proof
+[2017-10-22 22:39:41,209] replica.Replica<Replica:fb806>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 22:39:41,209] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,2,0] is signed,appended to result Proof
+[2017-10-22 22:39:41,210] replica.Replica<Replica:fb807>:OUTPUT: Forward Shuttle sent from head for Client:1
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb806>:INFO: Replica:1 received forward shuttle:1 for client:1
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb807>:INFO: Replica:0 received backward shuttle:0 for client:1
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:1
+[2017-10-22 22:39:41,211] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:0
+[2017-10-22 22:39:41,212] replica.Replica<Replica:fb806>:OUTPUT: Forward Shuttle:1 for Client:1 passed validation at Replica:1
+[2017-10-22 22:39:41,212] replica.Replica<Replica:fb806>:INFO: [Replica:1 runningState:{'movie': 'star'} OperationName:get OperationId:2 ]
+[2017-10-22 22:39:41,212] replica.Replica<Replica:fb806>:OUTPUT: result of operation is star for Replica:1
+[2017-10-22 22:39:41,212] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[2,get,2,1] is signed,appended to order Proof
+[2017-10-22 22:39:41,212] replica.Replica<Replica:fb807>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 22:39:41,213] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,2,1] is signed,appended to result Proof
+[2017-10-22 22:39:41,213] replica.Replica<Replica:fb807>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:0
+[2017-10-22 22:39:41,213] replica.Replica<Replica:fb807>:INFO: [Replica:0 runningState:{'movie': 'star'} OperationName:put OperationId:1]
+[2017-10-22 22:39:41,213] replica.Replica<Replica:fb807>:OUTPUT: backward shuttle reached head
+[2017-10-22 22:39:41,213] replica.Replica<Replica:fb806>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 22:39:41,214] replica.Replica<Replica:fb805>:INFO: Replica:2 received forward shuttle:1 for client:1
+[2017-10-22 22:39:41,214] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{1: {<MessageTypes.SHUTTLE: 2>: 1}, 0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 22:39:41,214] replica.Replica<Replica:fb805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:2
+[2017-10-22 22:39:41,214] replica.Replica<Replica:fb805>:OUTPUT: Forward Shuttle validation fail: slot not continuous
+[2017-10-22 22:39:41,215] replica.Replica<Replica:fb805>:OUTPUT: Forward Shuttle:1 for Client:1 failed validation at Replica:2
+[2017-10-22 22:39:41,215] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 sent reconfiguration_request to Olympus
+[2017-10-22 22:39:44,179] client.Client<Client:fb802>:INFO: Client :0 Failed to receive the response in time, sending request to all replicas
+[2017-10-22 22:39:44,182] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Client:fb802> client:<Client:fb802> 
+[2017-10-22 22:39:44,182] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.DIRECT: 0>: 1}}
+[2017-10-22 22:39:44,182] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,183] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,183] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:44,183] replica.Replica<Replica:fb806>:INFO: Replica 1 received retransmitted request from process:<Client:fb802> client:<Client:fb802> 
+[2017-10-22 22:39:44,184] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:44,184] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 1
+[2017-10-22 22:39:44,184] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 is not head. Sending the retransmitted request to head:<Replica:fb807>
+[2017-10-22 22:39:44,185] replica.Replica<Replica:fb805>:INFO: Replica 2 received retransmitted request from process:<Client:fb802> client:<Client:fb802> 
+[2017-10-22 22:39:44,185] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{1: {<MessageTypes.SHUTTLE: 2>: 1}, 0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:44,185] replica.Replica<Replica:fb805>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 2
+[2017-10-22 22:39:44,186] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 is not head. Sending the retransmitted request to head:<Replica:fb807>
+[2017-10-22 22:39:44,186] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Replica:fb806> client:<Client:fb802> 
+[2017-10-22 22:39:44,186] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.FORWARDED: 1>: 0}}
+[2017-10-22 22:39:44,186] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,187] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,187] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:44,188] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Replica:fb805> client:<Client:fb802> 
+[2017-10-22 22:39:44,189] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.FORWARDED: 1>: 1}}
+[2017-10-22 22:39:44,189] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,189] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,189] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:44,207] client.Client<Client:fb803>:INFO: Client :1 Failed to receive the response in time, sending request to all replicas
+[2017-10-22 22:39:44,210] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Client:fb803> client:<Client:fb803> 
+[2017-10-22 22:39:44,210] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 2, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.FORWARDED: 1>: 1}}
+[2017-10-22 22:39:44,211] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,211] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,211] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:44,211] replica.Replica<Replica:fb806>:INFO: Replica 1 received retransmitted request from process:<Client:fb803> client:<Client:fb803> 
+[2017-10-22 22:39:44,212] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0, <MessageTypes.DIRECT: 0>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:44,212] replica.Replica<Replica:fb806>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 1
+[2017-10-22 22:39:44,212] replica.Replica<Replica:fb806>:OUTPUT: Replica:1 is not head. Sending the retransmitted request to head:<Replica:fb807>
+[2017-10-22 22:39:44,213] replica.Replica<Replica:fb805>:INFO: Replica 2 received retransmitted request from process:<Client:fb803> client:<Client:fb803> 
+[2017-10-22 22:39:44,213] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.DIRECT: 0>: 0}, 0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 22:39:44,213] replica.Replica<Replica:fb805>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 2
+[2017-10-22 22:39:44,214] replica.Replica<Replica:fb805>:OUTPUT: Replica:2 is not head. Sending the retransmitted request to head:<Replica:fb807>
+[2017-10-22 22:39:44,214] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Replica:fb806> client:<Client:fb803> 
+[2017-10-22 22:39:44,214] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 2, <MessageTypes.RESULT_SHUTTLE: 3>: 0, <MessageTypes.FORWARDED: 1>: 0}, 0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.FORWARDED: 1>: 1}}
+[2017-10-22 22:39:44,214] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,215] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,215] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:44,216] replica.Replica<Replica:fb807>:INFO: Replica 0 received retransmitted request from process:<Replica:fb805> client:<Client:fb803> 
+[2017-10-22 22:39:44,217] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{1: {<MessageTypes.DIRECT: 0>: 2, <MessageTypes.RESULT_SHUTTLE: 3>: 0, <MessageTypes.FORWARDED: 1>: 1}, 0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.FORWARDED: 1>: 1}}
+[2017-10-22 22:39:44,217] replica.Replica<Replica:fb807>:OUTPUT: Failure trigger is None, failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for client_retransmission_request in Replica: 0
+[2017-10-22 22:39:44,217] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 doesnot have result shuttle
+[2017-10-22 22:39:44,218] replica.Replica<Replica:fb807>:OUTPUT: Replica:0 has already seen the operation
+[2017-10-22 22:39:47,186] client.Client<Client:fb802>:INFO: Client :0 Failed to receive the response from all the replicas.Initiating reconfiguration
+[2017-10-22 22:39:47,214] replica.Replica<Replica:fb806>:INFO: Replica:1 timeout out waiting for backward shuttle client:<Client:fb803>
+[2017-10-22 22:39:47,214] client.Client<Client:fb803>:INFO: Client :1 Failed to receive the response from all the replicas.Initiating reconfiguration
+[2017-10-22 22:39:47,215] replica.Replica<Replica:fb805>:INFO: Replica:2 timeout out waiting for backward shuttle client:<Client:fb803>
+[2017-10-22 22:39:47,215] replica.Replica<Replica:fb806>:INFO: Replica:1 timeout out waiting for backward shuttle client:<Client:fb802>
+[2017-10-22 22:39:47,216] replica.Replica<Replica:fb805>:INFO: Replica:2 timeout out waiting for backward shuttle client:<Client:fb802>
+[2017-10-22 22:39:47,219] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb803>
+[2017-10-22 22:39:50,188] client.Client<Client:fb802>:INFO: Client :0 hasnot received valid configuration from olympus
+[2017-10-22 22:39:50,217] client.Client<Client:fb803>:INFO: Client :1 hasnot received valid configuration from olympus
+[2017-10-22 22:39:50,217] client.Client<Client:fb803>:INFO: client 1 workload output:{'movie': 'stars'}
+[2017-10-22 22:39:50,220] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb803>
+[2017-10-22 22:39:50,221] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb803>
+[2017-10-22 22:39:50,221] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb802>
+[2017-10-22 22:39:50,222] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb802>
+[2017-10-22 22:39:50,223] replica.Replica<Replica:fb807>:INFO: Replica:0 timeout out waiting for backward shuttle client:<Client:fb802>
+[2017-10-22 22:39:53,191] client.Client<Client:fb802>:INFO: Client :0 hasnot received valid configuration from olympus
+[2017-10-22 22:39:53,192] client.Client<Client:fb802>:INFO: client 0 workload output:{}
+[2017-10-22 22:39:53,193] bcr.Node_<Node_:a5001>:INFO: master receiveded done from all clients
+[2017-10-22 22:39:53,194] bcr.Node_<Node_:a5001>:OUTPUT: master acknowledge done to clients
+[2017-10-22 22:39:53,194] bcr.Node_<Node_:a5001>:OUTPUT: master waiting  done from  olympus
+[2017-10-22 22:39:53,195] client.Client<Client:fb802>:INFO: client:0 received done from master
+[2017-10-22 22:39:53,195] client.Client<Client:fb803>:INFO: client:1 received done from master
+[2017-10-22 22:39:53,195] client.Client<Client:fb802>:INFO: client:0 sending done to olympus
+[2017-10-22 22:39:53,195] client.Client<Client:fb803>:INFO: client:1 sending done to olympus
+[2017-10-22 22:39:53,195] client.Client<Client:fb802>:INFO: Client 0 terminating
+[2017-10-22 22:39:53,196] client.Client<Client:fb803>:INFO: Client 1 terminating
+[2017-10-22 22:39:53,196] olympus.Olympus<Olympus:fb804>:OUTPUT: olympus received done from all clients
+[2017-10-22 22:39:53,197] olympus.Olympus<Olympus:fb804>:OUTPUT: olympus sending  done to all replicas

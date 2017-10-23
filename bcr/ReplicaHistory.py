@@ -59,6 +59,14 @@ class ReplicaHistory:
     def setLocalResultForOperation(self, operation, result):
         operationState = self.operationStateDict.get(operation)
         operationState.set_result_shuttle(result)
+        
+        
+    def removeOperation(self,operation):
+        try:
+            self.operationStateDict.pop(operation)
+        except:
+            print('error while removing operation')
+        
 
     def __str__(self):
         res = []

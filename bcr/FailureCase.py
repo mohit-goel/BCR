@@ -49,6 +49,8 @@ class FailureCase:
             self.failureChecks.drop_result_stmt = True
         elif action == "change_privatekey":
             self.failureChecks.change_privatekey = True
+        elif action == "remove_operationhistory":
+            self.failureChecks.remove_operationhistory = True
 
     def __str__(self):
         return str(self.failure)

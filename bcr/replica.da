@@ -63,9 +63,12 @@ class Replica(process):
 		replicakeyPrivate = replicaPrivate
 		replicakeyPublic = None
 		resultDict[(operationId, client)] = result
-
-		replicaHistory.insertOperation(
-			(operationName, operationId, client), result, slot)
+		
+		if (self.failureChecks.remove_operationhistory == False):
+			replicaHistory.insertOperation(
+				(operationName, operationId, client), result, slot)
+		else:
+			self.failureChecks.remove_operationhistory = False
 		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i ]' % (
 			index, runningState, operationName, operationId), sep=str_exp, level=log_level)
 

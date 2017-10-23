@@ -1,0 +1,80 @@
+[2017-10-22 21:50:13,367] da.api<MainProcess>:INFO: <Node_:a5001> initialized at 127.0.0.1:(UdpTransport=34731, TcpTransport=22150).
+[2017-10-22 21:50:13,367] da.api<MainProcess>:INFO: Starting program <module 'bcr' from '/Users/nikithakandru/Desktop/Async/BCR/bcr/bcr.py'>...
+[2017-10-22 21:50:13,367] da.api<MainProcess>:INFO: Running iteration 1 ...
+[2017-10-22 21:50:13,387] da.api<MainProcess>:INFO: Waiting for remaining child processes to terminate...(Press "Ctrl-C" to force kill)
+[2017-10-22 21:50:13,388] bcr.Node_<Node_:a5001>:OUTPUT: configuration parameters are read from file
+[2017-10-22 21:50:13,389] bcr.Node_<Node_:a5001>:OUTPUT: replica private keys
+[2017-10-22 21:50:13,390] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.SigningKey object at 0x1033c3c50>, <nacl.signing.SigningKey object at 0x1033c3cc0>, <nacl.signing.SigningKey object at 0x1033c3d30>]
+[2017-10-22 21:50:13,390] bcr.Node_<Node_:a5001>:OUTPUT: replica public keys
+[2017-10-22 21:50:13,390] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.VerifyKey object at 0x1033c3c88>, <nacl.signing.VerifyKey object at 0x1033c3cf8>, <nacl.signing.VerifyKey object at 0x1033c3d68>]
+[2017-10-22 21:50:13,466] olympus.Olympus<Olympus:ea803>:INFO: Starting Olympus
+[2017-10-22 21:50:13,470] client.Client<Client:ea802>:INFO: Client 0 asking for configuration from  Olympus
+[2017-10-22 21:50:13,512] replica.Replica<Replica:ea804>:INFO: Starting Replica
+[2017-10-22 21:50:13,512] replica.Replica<Replica:ea805>:INFO: Starting Replica
+[2017-10-22 21:50:13,512] replica.Replica<Replica:ea806>:INFO: Starting Replica
+[2017-10-22 21:50:13,513] olympus.Olympus<Olympus:ea803>:INFO: Message inithist sent to replica 0
+[2017-10-22 21:50:13,514] replica.Replica<Replica:ea804>:INFO: replica 0 received inithist from olympus
+[2017-10-22 21:50:13,514] olympus.Olympus<Olympus:ea803>:INFO: Message inithist sent to replica 1
+[2017-10-22 21:50:13,514] replica.Replica<Replica:ea804>:INFO: Replica 0 is head
+[2017-10-22 21:50:13,515] olympus.Olympus<Olympus:ea803>:INFO: Message inithist sent to replica 2
+[2017-10-22 21:50:13,515] olympus.Olympus<Olympus:ea803>:INFO: Olympus received configuration_request from client 0
+[2017-10-22 21:50:13,515] replica.Replica<Replica:ea805>:INFO: replica 1 received inithist from olympus
+[2017-10-22 21:50:13,516] replica.Replica<Replica:ea806>:INFO: replica 2 received inithist from olympus
+[2017-10-22 21:50:13,516] replica.Replica<Replica:ea806>:INFO: Replica 2 is tail
+[2017-10-22 21:50:13,516] olympus.Olympus<Olympus:ea803>:INFO: Olympus sending configuration response to client 0
+[2017-10-22 21:50:13,518] client.Client<Client:ea802>:INFO: Client 0 received configuration_response from olympus
+[2017-10-22 21:50:13,524] client.Client<Client:ea802>:INFO: Client 0 sent (operationName,operationId,key,value):(get,1,movie,None) to head
+[2017-10-22 21:50:13,525] replica.Replica<Replica:ea804>:INFO: Replica:0 received client_operation_request:0 from client:0 
+[2017-10-22 21:50:13,525] replica.Replica<Replica:ea804>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{0: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 21:50:13,525] replica.Replica<Replica:ea804>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 0 in Replica:0
+[2017-10-22 21:50:13,526] replica.Replica<Replica:ea804>:INFO: [Replica:0 runningState:{} OperationName:get OperationId:1 ]
+[2017-10-22 21:50:13,526] replica.Replica<Replica:ea804>:OUTPUT: result of operation is  for Replica:0
+[2017-10-22 21:50:13,526] replica.Replica<Replica:ea804>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[0,get,1,0] is signed,appended to order Proof
+[2017-10-22 21:50:13,527] replica.Replica<Replica:ea804>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'9238a956da94f16cf609c1b8b8ca16940cf1c77a9fb8ecf7f67ef75f6b2e0f68',get,1,0] is signed,appended to result Proof
+[2017-10-22 21:50:13,535] replica.Replica<Replica:ea804>:OUTPUT: Forward Shuttle sent from head for Client:0
+[2017-10-22 21:50:13,539] replica.Replica<Replica:ea805>:INFO: Replica:1 received forward shuttle:0 for client:0
+[2017-10-22 21:50:13,539] replica.Replica<Replica:ea805>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 21:50:13,539] replica.Replica<Replica:ea805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:1
+[2017-10-22 21:50:13,540] replica.Replica<Replica:ea805>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:1
+[2017-10-22 21:50:13,540] replica.Replica<Replica:ea805>:INFO: [Replica:1 runningState:{} OperationName:get OperationId:1 ]
+[2017-10-22 21:50:13,541] replica.Replica<Replica:ea805>:OUTPUT: result of operation is  for Replica:1
+[2017-10-22 21:50:13,541] replica.Replica<Replica:ea805>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[0,get,1,1] is signed,appended to order Proof
+[2017-10-22 21:50:13,542] replica.Replica<Replica:ea805>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'9238a956da94f16cf609c1b8b8ca16940cf1c77a9fb8ecf7f67ef75f6b2e0f68',get,1,1] is signed,appended to result Proof
+[2017-10-22 21:50:13,543] replica.Replica<Replica:ea805>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 21:50:13,544] replica.Replica<Replica:ea806>:INFO: Replica:2 received forward shuttle:0 for client:0
+[2017-10-22 21:50:13,544] replica.Replica<Replica:ea806>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 21:50:13,544] replica.Replica<Replica:ea806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:2
+[2017-10-22 21:50:13,545] replica.Replica<Replica:ea806>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:2
+[2017-10-22 21:50:13,545] replica.Replica<Replica:ea806>:INFO: [Replica:2 runningState:{} OperationName:get OperationId:1 ]
+[2017-10-22 21:50:13,545] replica.Replica<Replica:ea806>:OUTPUT: result of operation is  for Replica:2
+[2017-10-22 21:50:13,545] replica.Replica<Replica:ea806>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[0,get,1,2] is signed,appended to order Proof
+[2017-10-22 21:50:13,546] replica.Replica<Replica:ea806>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'9238a956da94f16cf609c1b8b8ca16940cf1c77a9fb8ecf7f67ef75f6b2e0f68',get,1,2] is signed,appended to result Proof
+[2017-10-22 21:50:13,548] replica.Replica<Replica:ea806>:OUTPUT: client result shuttle sent from tail to client:0
+[2017-10-22 21:50:13,549] client.Client<Client:ea802>:INFO: Client:0 received result: from <Replica:ea806>
+[2017-10-22 21:50:13,549] client.Client<Client:ea802>:INFO: Client:0 is operation valid: True
+[2017-10-22 21:50:13,550] replica.Replica<Replica:ea806>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 21:50:13,551] replica.Replica<Replica:ea805>:INFO: Replica:1 received backward shuttle:0 for client:0
+[2017-10-22 21:50:13,551] replica.Replica<Replica:ea805>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 21:50:13,551] client.Client<Client:ea802>:INFO: Client:0 Result Proof is valid
+[2017-10-22 21:50:13,551] replica.Replica<Replica:ea805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:1
+[2017-10-22 21:50:13,551] client.Client<Client:ea802>:INFO: Client:0 received VALID result
+[2017-10-22 21:50:13,552] client.Client<Client:ea802>:INFO: client 0 workload output:{}
+[2017-10-22 21:50:13,553] replica.Replica<Replica:ea805>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 21:50:13,553] bcr.Node_<Node_:a5001>:INFO: master receiveded done from all clients
+[2017-10-22 21:50:13,553] replica.Replica<Replica:ea805>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:1
+[2017-10-22 21:50:13,553] replica.Replica<Replica:ea805>:INFO: [Replica:1 runningState:{} OperationName:get OperationId:1]
+[2017-10-22 21:50:13,553] bcr.Node_<Node_:a5001>:OUTPUT: master acknowledge done to clients
+[2017-10-22 21:50:13,554] bcr.Node_<Node_:a5001>:OUTPUT: master waiting  done from  olympus
+[2017-10-22 21:50:13,554] client.Client<Client:ea802>:INFO: client:0 received done from master
+[2017-10-22 21:50:13,554] client.Client<Client:ea802>:INFO: client:0 sending done to olympus
+[2017-10-22 21:50:13,558] replica.Replica<Replica:ea805>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 21:50:13,558] olympus.Olympus<Olympus:ea803>:OUTPUT: olympus received done from all clients
+[2017-10-22 21:50:13,559] olympus.Olympus<Olympus:ea803>:OUTPUT: olympus sending  done to all replicas
+[2017-10-22 21:50:13,559] client.Client<Client:ea802>:INFO: Client 0 terminating
+[2017-10-22 21:50:13,559] replica.Replica<Replica:ea804>:INFO: Replica:0 received backward shuttle:0 for client:0
+[2017-10-22 21:50:13,560] replica.Replica<Replica:ea804>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{0: {<MessageTypes.DIRECT: 0>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 21:50:13,560] replica.Replica<Replica:ea804>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:0
+[2017-10-22 21:50:13,561] replica.Replica<Replica:ea804>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 21:50:13,562] replica.Replica<Replica:ea804>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:0
+[2017-10-22 21:50:13,562] replica.Replica<Replica:ea804>:INFO: [Replica:0 runningState:{} OperationName:get OperationId:1]
+[2017-10-22 21:50:13,562] replica.Replica<Replica:ea804>:OUTPUT: backward shuttle reached head

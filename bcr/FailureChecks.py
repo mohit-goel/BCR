@@ -4,6 +4,7 @@ class FailureChecks:
         self.change_result = False
         self.drop_result_stmt = False
         self.change_privatekey = False
+        self.remove_operationhistory = False
 
     def __str__(self):
-        return " change_oper=" + str(self.change_operation) + " change_result=" + str(self.change_result) + " drop_result=" + str(self.drop_result_stmt) + " change_privatekey=" + str(self.change_privatekey)
+        return " change_oper=" + str(self.change_operation) + " change_result=" + str(self.change_result) + " drop_result=" + str(self.drop_result_stmt) + " change_privatekey=" + str(self.change_privatekey) + "remove_operationhistory"+str(self.remove_operationhistory)
