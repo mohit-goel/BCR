@@ -8,7 +8,7 @@ class ReplicaHistory:
         self.operationStateDict = dict()
         self.slotOperationDict = dict()
         self.slotRunningStateHashDict = dict()
-        self.lastCheckpointProof = []
+        self.lastCheckpointProof = None
 
     def insertOperation(self, operation, localResult, slot):
         self.operationStateDict[operation] = OperationState(localResult, slot)
@@ -100,6 +100,10 @@ class ReplicaHistory:
         for k, v in self.slotRunningStateHashDict.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
+        
+        res.append("lastCheckpointProof=")
+        res.append(str(lastCheckpointProof))
+        res.append('\n')
         
 
         return ",".join(res)
