@@ -3,7 +3,7 @@ class CheckpointStatement   :
     def __init__(self, slot, runningStateHash):
         self.checkpointSlot = slot
         self.runningStateHash = runningStateHash
-        self.replicaId = replicaId
+        #self.replicaId = replicaId
 
     def getSlot(self):
         return self.slot
