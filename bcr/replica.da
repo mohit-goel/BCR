@@ -19,6 +19,8 @@ from MessageTypes import MessageTypes
 from FailureCase import FailureCase
 from FailureChecks import FailureChecks
 from Operation import Operation
+from CheckpointStatement import CheckpointStatement
+from CheckpointShuttle import CheckpointShuttle
 import pickle
 str_exp = ','
 log_level = 20
@@ -102,6 +104,21 @@ class Replica(process):
 		signedSerializedResultStatements = crypto.sign(
 			replicakeyPrivate, resultStatement)
 		shuttle.addResultStatement(signedSerializedResultStatements)
+	
+	def createCheckpointShuttle(slot):
+		checkpointshuttle = CheckpointShuttle(slot,[])
+		#checkpointst = CheckpointStatement(slot, replicaHistory.getRunningStateHash(slot))
+		#checkpointshuttle.addCheckpointStatement(checkpointst)
+		output('CheckpointShuttle created at head for slot %i\n' % slot)
+		send(('checkpoint_forward_shuttle', slot,checkpointshuttle ), to=nextReplica)
+		output('Chcekpoint Forward Shuttle sent from head for slot:%i\n' % slot)
+		
+	def truncateHistory(slot):
+		history = self.replicaHistory
+		#for i in (0,slot):
+		#history.pop
+		#self.replicaHistory.set
+			
 
 	def run():
 		output('Starting Replica', sep=str_exp, level=log_level)
@@ -362,11 +379,54 @@ class Replica(process):
 
 			if isHead:
 				output('backward shuttle reached head')
+				if (slot == 0):
+					createCheckpointShuttle(slot)
 			else:
 				shuttle = self.failureResultCheck(shuttle)
 				send(('backward_shuttle', operationName, key, value, client,
                                     operationId, slot, shuttle, clientNumber), to=prevReplica)
 				output('backward shuttle sent to previous replica')
+				
+				
+	def receive(msg=('checkpoint_forward_shuttle', slot,checkpointshuttle), from_=_prevReplica):
+
+		messagetype = MessageTypes.CHECKPOINT
+		messageNumber.incrementReplicaMessageType(messagetype)
+		output('Replica:%i received checkpoint forward shuttle:%s for slot:%i' % (index, str(
+			messageNumber.getReplicaMessageTypeCount(messagetype)), slot), sep=str_exp, level=log_level)
+		#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
+		output('Replica:%i {replica:{message_type>messagecount} is :%s' %
+		       (index, messageNumber.getReplicaDict()))
+
+		failurecase = FailureCase(
+			failcase, index, 0, messagetype, messageNumber, failureChecks)
+		self.failureChecks = failurecase.failureChecks
+		output('Failure trigger is %s , failure checks is %s for the checkpoint forward shuttle:%s slot:%i in Replica:%i' % (
+			failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount(messagetype)), slot, index))
+
+		#validateForwardShuttle(slot, checkpointshuttle)
+		if(True == False):
+			output('Chcekpoint Forward Shuttle:%s for slot:%i failed validation at Replica:%i' % (str(
+				messageNumber.getReplicaMessageTypeCount(messagetype)), slot, index))
+			send(('reconfiguration_request', index), to=olympus)
+			output('Replica:%i sent reconfiguration_request to Olympus' % index)
+
+		else:
+			output('Chcekpoint Forward Shuttle:%s for slot:%i passed validation at Replica:%i' % (str(
+				messageNumber.getReplicaMessageTypeCount( messagetype)), slot, index))
+			last_slot = slot
+			#actionsAtEveryCheckpoint( slot, checkpointshuttle )
+
+			if(isTail):
+				truncateHistory(slot)
+				#checkpointshuttle = self.failureCheckpointCheck(checkpointshuttle)
+				#send(('checkpoint_backward_shuttle', slot, checkpointshuttle ), to=prevReplica)
+				output('completed checkpoint proof shuttle generated from tail')
+
+			else:
+				send(('checkpoint_forward_shuttle', slot,checkpointshuttle ), to=nextReplica)
+				output('forward shuttle sent to next replica')
+				
 
 	def receive(msg=('inithist', running_State, replicas, head, tail, index, c, configuration, failcase), from_=_olympus, at=(yieldInitHist,)):
 		output('replica %i received inithist from olympus' %

@@ -7,6 +7,8 @@ class ReplicaHistory:
     def __init__(self):
         self.operationStateDict = dict()
         self.slotOperationDict = dict()
+        self.slotRunningStateHashDict = dict()
+        self.slotCheckpointProof = dict()
 
     def insertOperation(self, operation, localResult, slot):
         self.operationStateDict[operation] = OperationState(localResult, slot)
@@ -66,20 +68,42 @@ class ReplicaHistory:
             self.operationStateDict.pop(operation)
         except:
             print('error while removing operation')
-        
+    
+    def addRunningStateHash(self,slot,runningStateHash):
+        self.slotRunningStateHashDict[slot] = runningStateHash
+    
+    def getRunningStateHash(self,slot):
+        if slot in self.slotRunningStateHashDict:
+            return self.slotRunningStateHashDict[slot]
+        else:
+            return None
 
     def __str__(self):
         res = []
         res.append('\n')
+        
         res.append("operationStateDict=")
 
         for k, v in self.operationStateDict.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
         res.append('\n')
+        
         res.append("slotOperationDict=")
 
         for k, v in self.slotOperationDict.items():
+            res.append(str(k) + "=" + str(v))
+            res.append('\n')
+        
+        res.append("slotRunnungStateHashDict=")
+
+        for k, v in self.slotRunningStateHashDict.items():
+            res.append(str(k) + "=" + str(v))
+            res.append('\n')
+        
+        res.append("slotCheckpointProof=")
+
+        for k, v in self.slotCheckpointProof.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
 
