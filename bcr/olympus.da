@@ -36,7 +36,7 @@ class Olympus(process):
 
 	def run():
 		output('Starting Olympus', sep=str_exp, level=log_level)
-		replicas = new(rl.Replica, num=nReplicas,at='ReplicaNode')
+		replicas = new(rl.Replica, num=nReplicas)
 		replicas = list(replicas)
 		configuration = configuration + 1
 		self.head = replicas[0]
