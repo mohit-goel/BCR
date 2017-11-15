@@ -21,6 +21,7 @@ from FailureChecks import FailureChecks
 from Operation import Operation
 from CheckpointStatement import CheckpointStatement
 from CheckpointShuttle import CheckpointShuttle
+from  ReconfigurationRequestObject import ReconfigurationRequestObject
 import pickle
 str_exp = ','
 log_level = 20
@@ -118,7 +119,13 @@ class Replica(process):
 		#for i in (0,slot):
 		#history.pop
 		#self.replicaHistory.set
+		
+	def initiateReconfigurationRequest(privateKey,index,type):
+		isConfigurationValid = False
+		req = ReconfigurationRequestObject(self)
+		signedReq = crypto.sign(privateKey, req)
 			
+		send(('reconfiguration_request', signedReq,index,type), to=olympus)
 
 	def run():
 		output('Starting Replica', sep=str_exp, level=log_level)
@@ -147,7 +154,7 @@ class Replica(process):
 		elif timeout(nonhead_timeout):
 			output('Replica:%i timeout out waiting for backward shuttle client:%s' %
 			       (index, client), sep=str_exp, level=log_level)
-			send(('reconfiguration_request', index), to=olympus)
+			initiateReconfigurationRequest(replicaPrivate,index,'replica')
 
 	def failureResultCheck(tshuttle):
 		shuttle = tshuttle
@@ -321,7 +328,7 @@ class Replica(process):
 		if(validateForwardShuttle(operationId, operationName, slot, shuttle) == False):
 			output('Forward Shuttle:%s for Client:%i failed validation at Replica:%i' % (str(
 				messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber, index))
-			send(('reconfiguration_request', index), to=olympus)
+			initiateReconfigurationRequest(replicaPrivate,index,'replica')
 			output('Replica:%i sent reconfiguration_request to Olympus' % index)
 
 		else:
@@ -365,7 +372,7 @@ class Replica(process):
 		if(validateBackwardShuttle(operationId, slot, client, shuttle) == False):
 			output('Backward Shuttle:%s for client:%i failed validation at Replica:%i' % (str(
 				messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber, index))
-			send(('reconfiguration_request', index), to=olympus)
+			initiateReconfigurationRequest(replicaPrivate,index,'replica')
 			output('Replica:%i sent reconfiguration_request to Olympus' % index)
 
 		else:
@@ -408,7 +415,7 @@ class Replica(process):
 		if(True == False):
 			output('Chcekpoint Forward Shuttle:%s for slot:%i failed validation at Replica:%i' % (str(
 				messageNumber.getReplicaMessageTypeCount(messagetype)), slot, index))
-			send(('reconfiguration_request', index), to=olympus)
+			initiateReconfigurationRequest(replicaPrivate,index,'replica')
 			output('Replica:%i sent reconfiguration_request to Olympus' % index)
 
 		else:

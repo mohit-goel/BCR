@@ -13,6 +13,8 @@ from ResultStatement import ResultStatement
 from ReplicaHistory import ReplicaHistory
 from Operation import Operation
 from TestCases import TestCases
+
+from  ReconfigurationRequestObject import ReconfigurationRequestObject
 import pickle
 str_exp = ','
 log_level = 20
@@ -43,6 +45,7 @@ class Client(process):
 		self.maxResponsesPerResult = None
 		self.clientWorkLoadResultDict = dict()
 		self.resultWithMaxResponses = None
+		self.crypto = Crypto()
 
 	def run():
 		c = logical_clock()
@@ -100,13 +103,13 @@ class Client(process):
 								else:
 									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration" % (
 										clientNumber, maxResponsesPerResult), sep=str_exp, level=log_level)
-									initiateReconfigurationRequest(clientNumber)
+									initiateReconfigurationRequest(signedKey,clientNumber,'client')
 
 							elif timeout(client_timeout):
 								output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration" % (
 									clientNumber), sep=str_exp, level=log_level)
 
-								initiateReconfigurationRequest(clientNumber)
+								initiateReconfigurationRequest(signedKey,clientNumber,'client')
 
 								if(maxResponsesPerResult >= t + 1):
 									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas" % (
@@ -169,9 +172,12 @@ class Client(process):
 				maxResponsesPerResult = successfulResponseResultCountDict[result]
 				resultWithMaxResponses = result
 
-	def initiateReconfigurationRequest(index):
+	def initiateReconfigurationRequest(privateKey,index,type):
 		isConfigurationValid = False
-		send(('reconfiguration_request', index), to=olympus)
+		req = ReconfigurationRequestObject(self)
+		signedReq = crypto.sign(privateKey, req)
+			
+		send(('reconfiguration_request', signedReq,index,type), to=olympus)
 
 	def receive(msg=('getconfiguration_response', isValid), from_=_olympus):
 		isConfigurationValid = isValid
