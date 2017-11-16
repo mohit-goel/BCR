@@ -37,6 +37,8 @@ class configread:
                             self.head_timeout = int(val) / 1000
                         elif line.startswith('nonhead_timeout'):
                             self.nonhead_timeout = int(val) / 1000
+                        elif line.startswith('checkpt_interval'):
+                            self.checkpt_interval = int(val)
                         elif line.startswith('hosts'):
                             pattern = re.split(';', val)
                             pattern = [int(x.strip()) for x in pattern]
@@ -98,13 +100,44 @@ class configread:
                             pattern = [x.strip() for x in pattern]
                             self.failure[(i, j)] = []
                             for x in pattern:
-                                number = re.findall(r'\d+', x)
-                                client = int(number[0])
-                                req = int(number[1])
-                                x = x.replace(")", "")
-                                x = x.replace("(", ",")
-                                y = re.split(',', x)
-                                cond = y[0].strip()
-                                action = y[3].strip()
+                                spattern = re.split(',', x)
+                                spattern = [temp.strip() for temp in spattern]
+                                if len(spattern) > 2:
+                                    number = re.findall(r'\d+', x)
+                                    client = int(number[0])
+                                    req = int(number[1])
+                                    x = x.replace(")", "")
+                                    x = x.replace("(", ",")
+                                    y = re.split(',', x)
+                                    cond = y[0].strip()
+                                    action = y[3].strip()
+                                    if len(number) >2:
+                                        sleeptime = int(number[2])
+                                        action = action + str(sleeptime)                                
+                                        
+                                else:
+                                    number = re.findall(r'\d+', x)
+                                    client = -1
+                                    req = int(number[0])
+                                    x = x.replace(")", "")
+                                    x = x.replace("(", ",")
+                                    y = re.split(',', x)
+                                    cond = y[0].strip()
+                                    action = y[2].strip()
+                                    if len(number) >1:
+                                        sleeptime = int(number[1])
+                                        action = action + str(sleeptime)
+                                
                                 f = FailureObj(cond, client, req, action)
                                 self.failure[(i, j)].append(f)
+                                    
+                                    
+                                #number = re.findall(r'\d+', x)
+                                #client = int(number[0])
+                                #req = int(number[1])
+                                #x = x.replace(")", "")
+                                #x = x.replace("(", ",")
+                                #y = re.split(',', x)
+                                #cond = y[0].strip()
+                                #action = y[3].strip()
+                                #print("cond is %s, client is %i, req is %i, action is %s" % (cond,client,req,action))
