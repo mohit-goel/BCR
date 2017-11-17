@@ -41,6 +41,8 @@ class Olympus(process):
 		self.running_State = dict()
 		self.lastCheckPointAccepted = None
 		self.t = config.failure_num
+		self.crytographicHash = set()
+		self.numberOfCaughtUpResponses = 0
 	
 		
 	def createNewReplica():
@@ -118,7 +120,9 @@ class Olympus(process):
 			req = 'wedge'
 			signedReq = crypto.sign(olympusPrivate, req)
 			listOfWedgeStatements = []
+			crytographicHash = set()
 			numberOfWedgedResponses = 0
+			numberOfCaughtUpResponses = 0
 			send(('wedge', signedReq), to=replicas)
 			output('Olympus sent wedge requests to all replicas', sep = str_exp, level = log_level)
 			
@@ -127,8 +131,21 @@ class Olympus(process):
 				listOfWedgeStatements.sort(key=lambda tup:-1*tup[0])
 				start =0
 				(start,quoram) = findConsistentHistories(listOfWedgeStatements,start)
+				i =0
+				while i < len(quoram):
+					process = quoram[i][0]
+					diff = quoram[i][1]
+					signedReq = crypto.sign(olympusPrivate, diff)
+					send(('catch_up', signedReq), to=process)
 				
+				if await(numberOfCaughtUpResponses== t*1):
 					
+					if(len(crytographicHash) == 1):
+					
+						while i < len(quoram):
+							send(('get_running_state', signedReq), to=quoram[i][0])
+					
+						
 		else:
 			output('Reconfiguration Request not signed by correct process', sep = str_exp, level = log_level)
 			
@@ -142,14 +159,15 @@ class Olympus(process):
 			remaining = sortedByLongestHistory[start+1:]
 			numberOfConsistentHistoriesFound = 0
 			res = []
-			res.append(lh)
+			res.append((lh,dict()))
 			i =start +1
 			while (numberOfConsistentHistoriesFound < t+1 and i < len(remaining)) :
 				curList = remaining[i]
 				
 				if curList[2].slotOperationHist.items() <= lh.slotOperationHist.items():
 					numberOfConsistentHistoriesFound+=1
-					res.append(curList)
+					diff = { k : second_dict[k] for k in set(lh) - set(curList[2]) }
+					res.append((curList[1],diff))
 					
 				i = i+1
 				
@@ -159,6 +177,16 @@ class Olympus(process):
 				start+=1
 				
 		return (start,None)
+	
+	def receive(msg=('caught_up', caughtUp,index,type), from_=p):
+	
+		msg = crypto.isSignatureVerified(getPublicKey(index,type),caughtUp)
+		if msg != None:
+			output('Olympus received caughtUp:%s from replica:%s'%(msg,index,), sep = str_exp, level = log_level)
+			crytographicHash.add(msg)
+			numberOfWedgedResponses = numberOfWedgedResponses +1
+		else:
+			output('caughtUp not signed by correct replica', sep = str_exp, level = log_level)
 	
 	def receive(msg=('wedged', wedgeSt,index,type), from_=p):
 	

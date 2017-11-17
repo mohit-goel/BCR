@@ -28,6 +28,7 @@ from CheckpointShuttle import CheckpointShuttle
 from WedgedStatement import WedgedStatement
 from  ReconfigurationRequestObject import ReconfigurationRequestObject
 import pickle
+import copy
 str_exp = ','
 log_level = 20
 ol = import_da('olympus')
@@ -65,6 +66,7 @@ class Replica(process):
 		self.failureChecks = FailureChecks()
 		self.hasReceivedDone = False
 		self.checkpt_interval = 5
+		self.copiedRunningState = dict()
 
 	def actionsAtEveryReplica(operationName, key, value, operationId, client, slot, shuttle, clientNumber, messageType, clientRequest):
 
@@ -369,6 +371,25 @@ class Replica(process):
 		
 		else:
 			output('replica:%i did not accept request' % index)
+		
+	def receive(msg=('catch_up', signedReq)):
+		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
+		if msg != None:
+			output('Replica:%i received catch_up from olympus'%(index,), sep=str_exp, level=log_level)
+			copiedRunningState = copy.deepcopy(runningState)
+			for (k,v) in msg:
+				op = Operation(v.operationName,v.key,v.value)
+				result = operation.performOperation(copiedRunningState)
+				
+			
+			runningStateHash = crypto.getHash(self.runningState)
+		
+			signedReq = crypto.sign(replicaPrivate, runningStateHash)
+			send(('caught_up', signedReq,index,type), to=olympus)
+
+		else:
+			output('Replica:%i received catch_up but signature not valid'%(index,), sep=str_exp, level=log_level)
+	
 
 	def receive(msg=('wedge', signedReq)):
 		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
