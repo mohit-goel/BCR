@@ -13,6 +13,7 @@ from ResultStatement import ResultStatement
 from ReplicaHistory import ReplicaHistory
 from Operation import Operation
 from TestCases import TestCases
+from ClientRequest import ClientRequest
 
 from  ReconfigurationRequestObject import ReconfigurationRequestObject
 import pickle
