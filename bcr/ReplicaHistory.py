@@ -11,9 +11,9 @@ class ReplicaHistory:
         self.lastCheckpointProof = None
         self.lastCheckpointSlot = -1
 
-    def insertOperation(self, operation, localResult, slot):
+    def insertOperation(self, operation,clientRequest, localResult, slot):
         self.operationStateDict[operation] = OperationState(localResult, slot)
-        self.slotOperationDict[slot] = operation
+        self.slotOperationDict[slot] = clientRequest
 
     def doesSlotExistForDifferentOperation(self, slot, new_operation):
         if slot in self.slotOperationDict:

@@ -67,9 +67,10 @@ class Client(process):
 				numberOfResponses = 0
 				successfulResponseResultCountDict = dict()
 				maxResponsesPerResult = 0
+				clientOperationReq = ClientRequest(operationName, key, value, self, operationId, c, clientNumber)
+				signedClientReq = crypto.sign(signedKey,clientOperationReq)
 
-				send(('client_operation_request', operationName, key,
-                                    value, self, operationId, c, clientNumber), to=head)
+				send(('client_operation_request', signedClientReq,clientNumber ), to=head)
 				output('Client %i sent (operationName,operationId,key,value):(%s,%s,%s,%s) to head' % (
 					clientNumber, operationName, operationId, key, value), sep=str_exp, level=log_level)
 				if await(isValidResponse):
@@ -89,8 +90,9 @@ class Client(process):
 						maxResponsesPerResult = 0
 						send(('getconfiguration', clientNumber), to=olympus)
 						if await(isConfigurationValid):
-							send(('client_retransmission_request', operationName, key, value,
-                                                            self, operationId, logical_clock(), clientNumber), to=replicas)
+							clientRetrasmitReq = ClientRequest(operationName, key, value, self, operationId, c, clientNumber)
+							signedClientRetransmitReq = crypto.sign(signedKey,clientRetrasmitReq)
+							send(('client_retransmission_request', signedClientRetransmitReq, clientNumber ), to=replicas)
 							if await(numberOfResponses == 2 * t + 1):
 								output("Client :%i received :%i responses from replicas" %
 								       (clientNumber, numberOfResponses,), sep=str_exp, level=log_level)

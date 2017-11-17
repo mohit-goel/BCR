@@ -66,7 +66,7 @@ class Replica(process):
 		self.hasReceivedDone = False
 		self.checkpt_interval = 5
 
-	def actionsAtEveryReplica(operationName, key, value, operationId, client, slot, shuttle, clientNumber, messageType):
+	def actionsAtEveryReplica(operationName, key, value, operationId, client, slot, shuttle, clientNumber, messageType, clientRequest):
 
 		operation = Operation(operationName, key, value)
 		result = operation.performOperation(runningState)
@@ -87,7 +87,7 @@ class Replica(process):
 		
 		if (self.failureChecks.remove_operationhistory == False):
 			replicaHistory.insertOperation(
-				(operationName, operationId, client), result, slot)
+				(operationName, operationId, client),clientRequest, result, slot)
 		else:
 			self.failureChecks.remove_operationhistory = False
 		output('[Replica:%i runningState:%s OperationName:%s OperationId:%i ]' % (
@@ -243,106 +243,129 @@ class Replica(process):
 
 		return shuttle
 
-	def receive(msg=('client_retransmission_request', operationName, key, value, client, operationId, clock, clientNumber), from_=sender):
+	def receive(msg=('client_retransmission_request', signedRequest, clientIndex), from_=sender):
 		output('Replica %i received retransmitted request from process:%s client:%s ' %
-		       (index, sender, client), sep=str_exp, level=log_level)
+		       (index, sender, clientIndex), sep=str_exp, level=log_level)
 		res = validations.shouldReplicaAcceptRequest(state)
 
 		if res:
-			if sender in replicaChain:
-				messagetype = MessageTypes.FORWARDED
+			clientRequest =  crypto.isSignatureVerified(clientPublic[clientIndex], signedRequest)
+			if (clientRequest is None):
+				output("Client Retransmission Request failed validation at Replica:%i : Signature not verified"%(index))
 			else:
-				messagetype = MessageTypes.DIRECT
-
-			messageNumber.incrementMessageType(clientNumber, messagetype)
-			output('Replica:%i {client:{message_type>messagecount}:%s' %
-			       (index, messageNumber.getDict()))
-			failurecase = FailureCase(
-				failcase, index, clientNumber, messagetype, messageNumber, failureChecks)
-			self.failureChecks = failurecase.failureChecks
-			output('Failure trigger is %s, failure checks: %s for client_retransmission_request in Replica: %i' % (
-				failurecase, failureChecks, index))
+				operationName = clientRequest.operationName
+				key = clientRequest.key
+				value = clientRequest.value
+				client = clientRequest.client
+				operationId = clientRequest.operationId
+				clock =clientRequest.logicalClock
+				clientNumber = clientRequest.clientNumber
+				
+				if sender in replicaChain:
+					messagetype = MessageTypes.FORWARDED
+				else:
+					messagetype = MessageTypes.DIRECT
+	
+				messageNumber.incrementMessageType(clientNumber, messagetype)
+				output('Replica:%i {client:{message_type>messagecount}:%s' %
+				       (index, messageNumber.getDict()))
+				failurecase = FailureCase(
+					failcase, index, clientNumber, messagetype, messageNumber, failureChecks)
+				self.failureChecks = failurecase.failureChecks
+				output('Failure trigger is %s, failure checks: %s for client_retransmission_request in Replica: %i' % (
+					failurecase, failureChecks, index))
+				
+				if (self.failureChecks.drop == True):
+					output("Dropping received message due to failure scenario")
+					self.failureChecks.drop = False
 			
-			if (self.failureChecks.drop == True):
-				output("Dropping received message due to failure scenario")
-				self.failureChecks.drop = False
+				else:
+					initialFailureChecks()
 		
-			else:
-				initialFailureChecks()
-	
-				if replicaHistory.isResultShuttleArrivedForOperation((operationName, operationId, client)):
-					output('Replica:%i has result shuttle ' % (index))
-					generateResponseFromResultShuttle(
-						operationName, key, value, client, operationId, clock, clientNumber)
-	
-				elif isHead:
-					output('Replica:%i doesnot have result shuttle' % (index))
-					if replicaHistory.isOperationExist((operationName, operationId, client)):
-						output('Replica:%i has already seen the operation' % (index))
+					if replicaHistory.isResultShuttleArrivedForOperation((operationName, operationId, client)):
+						output('Replica:%i has result shuttle ' % (index))
+						generateResponseFromResultShuttle(
+							operationName, key, value, client, operationId, clock, clientNumber)
+		
+					elif isHead:
+						output('Replica:%i doesnot have result shuttle' % (index))
+						if replicaHistory.isOperationExist((operationName, operationId, client)):
+							output('Replica:%i has already seen the operation' % (index))
+							awaitingForBackwardShuttle(
+								operationName, key, value, client, operationId, clock, clientNumber)
+		
+						else:
+							output('Replica:%i has not already seen the operation:%s.Initiating the protocol from scratch' % (
+								index, operationName))
+							last_slot = last_slot + 1
+							orderProof = OrderProof([], last_slot, operationName, operationId)
+							resultProof = ResultProof([], operationName, operationId)
+							shuttle = Shuttle(resultProof, orderProof)
+							actionsAtEveryReplica(operationName, key, value, operationId,
+							                      client, last_slot, shuttle, clientNumber, messagetype, clientRequest)
+							send(('forward_shuttle', signedRequest, operationName, key, value, client,
+		                                            operationId, last_slot, shuttle, clientNumber), to=nextReplica)
+							output('Forward Shuttle sent from head for Client:%i' % clientNumber)
+							awaitingForBackwardShuttle(
+								operationName, key, value, client, operationId, clock, clientNumber)
+		
+					else:
+						output('Replica:%i is not head. Sending the retransmitted request to head:%s' % (
+							index, head))
+						send(('client_retransmission_request', operationName, key,
+		                                    value, client, operationId, clock, clientNumber), to=head)
 						awaitingForBackwardShuttle(
 							operationName, key, value, client, operationId, clock, clientNumber)
+
+
+	def receive(msg=('client_operation_request', signedRequest, clientIndex)):
+		if validations.shouldReplicaAcceptRequest(self.state):
+			clientRequest =  crypto.isSignatureVerified(clientPublic[clientIndex], signedRequest)
+			if (clientRequest is None):
+				output("Client Request failed validation at Replica:%i : Signature not verified"%(index))
+			else:
+				operationName = clientRequest.operationName
+				key = clientRequest.key
+				value = clientRequest.value
+				client = clientRequest.client
+				operationId = clientRequest.operationId
+				logical_Clock =clientRequest.logicalClock
+				clientNumber = clientRequest.clientNumber
 	
-					else:
-						output('Replica:%i has not already seen the operation:%s.Initiating the protocol from scratch' % (
-							index, operationName))
+				messagetype = MessageTypes.DIRECT
+				messageNumber.incrementMessageType(clientNumber, MessageTypes.DIRECT)
+				output('Replica:%i received client_operation_request:%s from client:%i ' % (index, str(
+					messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber), sep=str_exp, level=log_level)
+				output('Replica:%i {client:{message_type>messagecount} is :%s' % (
+					index, messageNumber.getDict()))
+				failurecase = FailureCase(
+					failcase, index, clientNumber, messagetype, messageNumber, failureChecks)
+				self.failureChecks = failurecase.failureChecks
+				output('Failure trigger is %s , failure checks: %s for the client_operation_request %s in Replica:%i' % (
+					failurecase, failureChecks, str(messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), index))
+				
+				if (self.failureChecks.drop == True):
+					output("Dropping received message due to failure scenario")
+					self.failureChecks.drop = False
+			
+				else:
+					initialFailureChecks()
+		
+					orderProof = None
+					resultProof = None
+					shuttle = None
+					if(isHead):
 						last_slot = last_slot + 1
 						orderProof = OrderProof([], last_slot, operationName, operationId)
 						resultProof = ResultProof([], operationName, operationId)
 						shuttle = Shuttle(resultProof, orderProof)
-						actionsAtEveryReplica(operationName, key, value, operationId,
-						                      client, last_slot, shuttle, clientNumber, messagetype)
-						send(('forward_shuttle', operationName, key, value, client,
-	                                            operationId, last_slot, shuttle, clientNumber), to=nextReplica)
-						output('Forward Shuttle sent from head for Client:%i' % clientNumber)
-						awaitingForBackwardShuttle(
-							operationName, key, value, client, operationId, clock, clientNumber)
-	
-				else:
-					output('Replica:%i is not head. Sending the retransmitted request to head:%s' % (
-						index, head))
-					send(('client_retransmission_request', operationName, key,
-	                                    value, client, operationId, clock, clientNumber), to=head)
-					awaitingForBackwardShuttle(
-						operationName, key, value, client, operationId, clock, clientNumber)
-
-
-	def receive(msg=('client_operation_request', operationName, key, value, client, operationId, logical_Clock, clientNumber)):
-		if validations.shouldReplicaAcceptRequest(self.state):
-
-			messagetype = MessageTypes.DIRECT
-			messageNumber.incrementMessageType(clientNumber, MessageTypes.DIRECT)
-			output('Replica:%i received client_operation_request:%s from client:%i ' % (index, str(
-				messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber), sep=str_exp, level=log_level)
-			output('Replica:%i {client:{message_type>messagecount} is :%s' % (
-				index, messageNumber.getDict()))
-			failurecase = FailureCase(
-				failcase, index, clientNumber, messagetype, messageNumber, failureChecks)
-			self.failureChecks = failurecase.failureChecks
-			output('Failure trigger is %s , failure checks: %s for the client_operation_request %s in Replica:%i' % (
-				failurecase, failureChecks, str(messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), index))
-			
-			if (self.failureChecks.drop == True):
-				output("Dropping received message due to failure scenario")
-				self.failureChecks.drop = False
 		
-			else:
-				initialFailureChecks()
-	
-				orderProof = None
-				resultProof = None
-				shuttle = None
-				if(isHead):
-					last_slot = last_slot + 1
-					orderProof = OrderProof([], last_slot, operationName, operationId)
-					resultProof = ResultProof([], operationName, operationId)
-					shuttle = Shuttle(resultProof, orderProof)
-	
-				actionsAtEveryReplica(operationName, key, value, operationId,
-				                      client, last_slot, shuttle, clientNumber, messagetype)
-	
-				send(('forward_shuttle', operationName, key, value, client,
-	                            operationId, last_slot, shuttle, clientNumber), to=nextReplica)
-				output('Forward Shuttle sent from head for Client:%i' % clientNumber)
+					actionsAtEveryReplica(operationName, key, value, operationId,
+					                      client, last_slot, shuttle, clientNumber, messagetype,clientRequest)
+		
+					send(('forward_shuttle', signedRequest, operationName, key, value, client,
+		                            operationId, last_slot, shuttle, clientNumber), to=nextReplica)
+					output('Forward Shuttle sent from head for Client:%i' % clientNumber)
 		
 		else:
 			output('replica:%i did not accept request' % index)
@@ -369,7 +392,10 @@ class Replica(process):
 
 
 
-	def validateForwardShuttle(operationId, operationName, slot, shuttle):
+	def validateForwardShuttle(signedRequest, clientIndex, operationId, operationName, slot, shuttle):
+		clientRequest =  crypto.isSignatureVerified(clientPublic[clientIndex], signedRequest)
+		if (clientRequest is None):
+			output("Forward Shuttle validation fail: Client Signature not verified")
 		if slot in replicaHistory.slotOperationDict.keys():
 			output("Forward Shuttle validation fail: slot already used")
 			return False
@@ -389,7 +415,7 @@ class Replica(process):
 				currentKey = replicaPublicList[i]
 				ordstmt = crypto.isSignatureVerified(currentKey, currentEncodedSt)
 				if(ordstmt is None):
-					output("Forward Shuttle validation fail: Signature not verified")
+					output("Forward Shuttle validation fail: Some Replica Signature not verified")
 					return False
 
 				if (operationId != ordstmt.operationId):
@@ -451,7 +477,7 @@ class Replica(process):
 			#	return (False, "Result proof validation fail: Result doesn't match Result Stmt of some replica")
 		return True
 
-	def receive(msg=('forward_shuttle', operationName, key, value, client, operationId, slot, shuttle, clientNumber), from_=_prevReplica):
+	def receive(msg=('forward_shuttle',signedRequest, operationName, key, value, client, operationId, slot, shuttle, clientNumber), from_=_prevReplica):
 
 		messagetype = MessageTypes.SHUTTLE
 		messageNumber.incrementMessageType(clientNumber, messagetype)
@@ -474,7 +500,7 @@ class Replica(process):
 		else:
 			initialFailureChecks()
 	
-			if(validateForwardShuttle(operationId, operationName, slot, shuttle) == False):
+			if(validateForwardShuttle(signedRequest, clientNumber, operationId, operationName, slot, shuttle) == False):
 				output('Forward Shuttle:%s for Client:%i failed validation at Replica:%i' % (str(
 					messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber, index))
 				initiateReconfigurationRequest(replicaPrivate,index,'replica')
@@ -484,8 +510,9 @@ class Replica(process):
 				output('Forward Shuttle:%s for Client:%i passed validation at Replica:%i' % (str(
 					messageNumber.getClientMessageTypeCount(clientNumber, messagetype)), clientNumber, index))
 				last_slot = slot
+				clientRequest =  crypto.isSignatureVerified(clientPublic[clientNumber], signedRequest)
 				actionsAtEveryReplica(operationName, key, value, operationId,
-				                      client, slot, shuttle, clientNumber, messagetype)
+				                      client, slot, shuttle, clientNumber, messagetype, clientRequest)
 	
 				if(isTail):
 					response = resultDict[(operationId, client)]
@@ -500,7 +527,7 @@ class Replica(process):
 					output('backward shuttle generated from tail')
 	
 				else:
-					send(('forward_shuttle', operationName, key, value, client,
+					send(('forward_shuttle',signedRequest, operationName, key, value, client,
 	                                    operationId, slot, shuttle, clientNumber), to=nextReplica)
 					output('forward shuttle sent to next replica')
 
