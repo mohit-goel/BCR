@@ -25,6 +25,7 @@ from FailureChecks import FailureChecks
 from Operation import Operation
 from CheckpointStatement import CheckpointStatement
 from CheckpointShuttle import CheckpointShuttle
+from WedgedStatement import WedgedStatement
 from  ReconfigurationRequestObject import ReconfigurationRequestObject
 import pickle
 str_exp = ','
@@ -304,6 +305,7 @@ class Replica(process):
 					awaitingForBackwardShuttle(
 						operationName, key, value, client, operationId, clock, clientNumber)
 
+
 	def receive(msg=('client_operation_request', operationName, key, value, client, operationId, logical_Clock, clientNumber)):
 		if validations.shouldReplicaAcceptRequest(self.state):
 
@@ -344,6 +346,28 @@ class Replica(process):
 		
 		else:
 			output('replica:%i did not accept request' % index)
+
+	def receive(msg=('wedge', signedReq)):
+		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
+		if msg != None:
+			output('Replica:%i received wedge request from olympus'%(index,), sep=str_exp, level=log_level)
+
+			wedgedSt = WedgedStatement(replicaHistory.lastCheckpointProof,replicaHistory.slotOperationDict)
+
+			signedReq = crypto.sign(replicaPrivate, wedgedSt)
+			self.state = State.IMMUTABLE
+			send(('wedged', signedReq,index,type), to=olympus)
+			
+
+
+
+
+
+			
+		else:
+			output('Replica:%i received wedge request but signature not valid'%(index,), sep=str_exp, level=log_level)
+
+
 
 	def validateForwardShuttle(operationId, operationName, slot, shuttle):
 		if slot in replicaHistory.slotOperationDict.keys():
@@ -623,6 +647,7 @@ class Replica(process):
 				else:
 					send(('checkpoint_backward_shuttle', slot, checkpointshuttle ), to=prevReplica)
 					output('Completed Chcekpoint Proof Shuttle sent to previous replica')			
+
 
 	def receive(msg=('inithist', running_State, replicas, head, tail, index, c, configuration, failcase), from_=_olympus, at=(yieldInitHist,)):
 		output('replica %i received inithist from olympus' %

@@ -36,22 +36,13 @@ def main():
 	(olympusPrivate, olympusPublic) = crypto.getSignedKey()
 	clientPrivate = []
 	clientPublic = []
-	replicaPrivate = []
-	replicaPublic = []
+	
 
 	for i in range(nclients):
 		(private, public) = crypto.getSignedKey()
 		clientPrivate.append(private)
 		clientPublic.append(public)
 
-	for i in range(nReplicas):
-		(private, public) = crypto.getSignedKey()
-		replicaPrivate.append(private)
-		replicaPublic.append(public)
-	output('replica private keys')
-	output(' %s' % (replicaPrivate,))
-	output('replica public keys')
-	output(' %s' % (replicaPublic,))
 
 	clients = new(cl.Client, num=nclients)
 	clients = list(clients)
@@ -68,11 +59,11 @@ def main():
 				operation.performOperation(masterDict)
 			testCases = TestCases(config.test_case_name, masterDict)
 
-		setup(clients[i], (olympus, i, clientPrivate[i], olympusPublic, replicaPublic,
+		setup(clients[i], (olympus, i, clientPrivate[i], olympusPublic,
                      config.workload[i], config.failure_num, testCases, config.client_timeout))
 
 	setup(olympus, (nReplicas, clients, olympusPrivate, olympusPublic, clientPublic,
-                 replicaPublic, replicaPrivate, config.failure, config.nonhead_timeout))
+                 config.failure, config.nonhead_timeout,config))
 	start(olympus)
 	start(clients)
 

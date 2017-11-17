@@ -23,7 +23,7 @@ ol = import_da('olympus')
 
 class Client(process):
 
-	def setup(olympus: ol.Olympus, clientNumber: int, signedKey: nacl.signing.SigningKey, olympusPublic: nacl.signing.SigningKey, replicaPublic: list, workload: list, numberOfFailures: int, testCases: TestCases, client_timeout: int):
+	def setup(olympus: ol.Olympus, clientNumber: int, signedKey: nacl.signing.SigningKey, olympusPublic: nacl.signing.SigningKey, workload: list, numberOfFailures: int, testCases: TestCases, client_timeout: int):
 		self.q = []
 		self.head = None
 		self.tail = None
@@ -32,7 +32,7 @@ class Client(process):
 		self.operationId = 0
 		self.signedKey = signedKey
 		self.olympusPublic = olympusPublic
-		self.replicaPublicList = replicaPublic
+		self.replicaPublicList = []
 		self.workload = workload
 		self.validations = Validations()
 		self.isValidResponse = False
@@ -52,15 +52,14 @@ class Client(process):
 		send(('configuration_request', clientNumber), to=olympus)
 		output('Client %i asking for configuration from  Olympus' %
 		       (clientNumber,), sep=str_exp, level=log_level)
-		await(some(received(('configuration_response', _, _, _, c2), from_=olympus), has=c2 >= c))
-
+		await(some(received(('configuration_response', _, _, _, c2,_), from_=olympus), has=c2 >= c))
+		
 		for load in self.workload:
 			key = load.key
 			value = load.value
 			operationName = load.action
 			operationId = operationId + 1
 			c = logical_clock()
-
 			send(('getconfiguration', clientNumber), to=olympus)
 			if await(isConfigurationValid):
 				isValidResponse = False
@@ -182,9 +181,10 @@ class Client(process):
 	def receive(msg=('getconfiguration_response', isValid), from_=_olympus):
 		isConfigurationValid = isValid
 
-	def receive(msg=('configuration_response', replicas, head, tail, c), from_=_olympus):
+	def receive(msg=('configuration_response', replicas, head, tail, c,replicaPublicList), from_=_olympus):
 		output('Client %i received configuration_response from olympus' %
 		       (clientNumber,), sep=str_exp, level=log_level)
 		self.head = head
 		self.tail = tail
 		self.replicas = replicas
+		self.replicaPublicList = replicaPublicList
