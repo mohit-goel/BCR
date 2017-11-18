@@ -375,21 +375,38 @@ class Replica(process):
 	def receive(msg=('catch_up', signedReq)):
 		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
 		if msg != None:
-			output('Replica:%i received catch_up from olympus'%(index,), sep=str_exp, level=log_level)
-			copiedRunningState = copy.deepcopy(runningState)
-			for (k,v) in msg:
+			output('Replica:%i received catch_up:%s from olympus:%s'%(index,msg,type(msg)), sep=str_exp, level=log_level)
+
+			copiedRunningState = {key:runningState[key] for key in runningState.keys()}
+			for (k,v) in msg.items():
 				op = Operation(v.operationName,v.key,v.value)
-				result = operation.performOperation(copiedRunningState)
+				result = op.performOperation(copiedRunningState)
 				
 			
-			runningStateHash = crypto.getHash(self.runningState)
+			runningStateHash = crypto.getHash(self.copiedRunningState)
 		
 			signedReq = crypto.sign(replicaPrivate, runningStateHash)
-			send(('caught_up', signedReq,index,type), to=olympus)
+			send(('caught_up', signedReq,index,'replica'), to=olympus)
 
 		else:
 			output('Replica:%i received catch_up but signature not valid'%(index,), sep=str_exp, level=log_level)
 	
+	def receive(msg=('get_running_state')):
+		
+			output('Replica:%i received get_running_state from olympus'%(index,), sep=str_exp, level=log_level)
+		
+			signedReq = crypto.sign(replicaPrivate, copiedRunningState)
+			send(('running_state', signedReq,index,'replica'), to=olympus)
+			
+	
+	def receive(msg=('kill')):
+		
+			output('Replica:%i received kill from olympus'%(index,), sep=str_exp, level=log_level)
+			
+			logging.shutdown()
+			os._exit(-1)
+
+		
 
 	def receive(msg=('wedge', signedReq)):
 		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
@@ -400,14 +417,10 @@ class Replica(process):
 
 			signedReq = crypto.sign(replicaPrivate, wedgedSt)
 			self.state = State.IMMUTABLE
-			send(('wedged', signedReq,index,type), to=olympus)
-			
-
-
-
-
-
-			
+			output('Replica:%i changed its state  to IMMUTABLE'%(index,), sep=str_exp, level=log_level)
+			output('Replica:%i sending its wedged statement:%s to olympus'%(index,wedgedSt), sep=str_exp, level=log_level)
+			send(('wedged', signedReq,index,'replica'), to=olympus)
+	
 		else:
 			output('Replica:%i received wedge request but signature not valid'%(index,), sep=str_exp, level=log_level)
 

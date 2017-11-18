@@ -33,6 +33,27 @@ class Validations:
                 return (False, "Result proof validation fail: Result doesn't match Result Stmt of some replica")
 
         return (True, "Result Proof is valid")
+    
+    def clientValidationOfResultProof(self, result, resultProof, replicaPublicList, proc,t):
+        if len(resultProof.getlistOfResultSt()) < (len(replicaPublicList)):
+            return (False, "Result Proof validation fail: Result Statement of some replica missing")
+
+        resultStList = resultProof.getlistOfResultSt()
+        numberOfResultStMatched = 0
+        for i in range(len(resultStList)):
+            currentEncodedSt = resultStList[i]
+            currentKey = replicaPublicList[i]
+            decodeSt = self.crypto.isSignatureVerified(
+                currentKey, currentEncodedSt)
+            if (not ((decodeSt is None) or (not self.crypto.verifyHashes(result, decodeSt.result)))):
+                numberOfResultStMatched+=1
+            
+        if numberOfResultStMatched >= t+1:
+            return (True, "Result Proof is valid")
+        else:
+            return (True, "Result Proof is notvalid: quoram not found")
+            
+
 
     def responseReceivedWithCorrectOperation(self, operationName, operationId, receivedOperationName, receivedOperationId):
         return (operationName == receivedOperationName) and (operationId == receivedOperationId)
