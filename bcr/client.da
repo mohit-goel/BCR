@@ -52,16 +52,15 @@ class Client(process):
 		c = logical_clock()
 		
 		
-		
-		for load in self.workload:
+		loadCounter = 0
+		while loadCounter < len(self.workload):
+				load = workload[loadCounter]
 				key = load.key
 				value = load.value
 				operationName = load.action
 				operationId = operationId + 1
 				c = logical_clock()
-				output('Client %i asking for configuration from  Olympus' %
-			       (clientNumber,), sep=str_exp, level=log_level)
-				send(('configuration_request', clientNumber), to=olympus)
+				resultReceivedForthisRequest  = False
 				if await(isConfigurationValid):
 					isValidResponse = False
 					numberOfResponses = 0
@@ -76,58 +75,59 @@ class Client(process):
 					if await(isValidResponse):
 						output('Client:%i received VALID result' %
 						       (clientNumber,), sep=str_exp, level=log_level)
-
+						resultReceivedForthisRequest = True
 						modifyDictionary(resultWithMaxResponses,
 						                 clientWorkLoadResultDict, operationName, key, value)
-						continue
+						
 
 					elif timeout(client_timeout):
 						output("Client :%i Failed to receive the response in time, sending request to all replicas" % (
 							clientNumber,), sep=str_exp, level=log_level)
-						while(1):
-							numberOfResponses = 0
-							successfulResponseResultCountDict = dict()
-							maxResponsesPerResult = 0
-							send(('configuration_request', clientNumber), to=olympus)
-							if await(isConfigurationValid):
-								clientRetrasmitReq = ClientRequest(operationName, key, value, self, operationId, c, clientNumber)
-								signedClientRetransmitReq = crypto.sign(signedKey,clientRetrasmitReq)
-								send(('client_retransmission_request', signedClientRetransmitReq, clientNumber ), to=replicas)
-								if await(numberOfResponses == 2 * t + 1):
-									output("Client :%i received :%i responses from replicas" %
-									       (clientNumber, numberOfResponses,), sep=str_exp, level=log_level)
-									if(maxResponsesPerResult >= t + 1):
-										output("Client :%i received :%i correct quorum of correct result:%s from replicas" % (
-											clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
-										modifyDictionary(resultWithMaxResponses,
-										                 clientWorkLoadResultDict, operationName, key, value)
-										break
-									else:
-										output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration" % (
-											clientNumber, maxResponsesPerResult), sep=str_exp, level=log_level)
-										initiateReconfigurationRequest(signedKey,clientNumber,'client')
-
-								elif timeout(client_timeout):
-									output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration" % (
-										clientNumber), sep=str_exp, level=log_level)
-
+						
+						numberOfResponses = 0
+						successfulResponseResultCountDict = dict()
+						maxResponsesPerResult = 0
+						if await(isConfigurationValid):
+							clientRetrasmitReq = ClientRequest(operationName, key, value, self, operationId, c, clientNumber)
+							signedClientRetransmitReq = crypto.sign(signedKey,clientRetrasmitReq)
+							send(('client_retransmission_request', signedClientRetransmitReq, clientNumber ), to=replicas)
+							if await(numberOfResponses == 2 * t + 1):
+								output("Client :%i received :%i responses from replicas" %
+								       (clientNumber, numberOfResponses,), sep=str_exp, level=log_level)
+								if(maxResponsesPerResult >= t + 1):
+									output("Client :%i received :%i correct quorum of correct result:%s from replicas" % (
+										clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
+									resultReceivedForthisRequest = True
+									modifyDictionary(resultWithMaxResponses,
+									                 clientWorkLoadResultDict, operationName, key, value)
+									
+								else:
+									output("Client :%i hasn't received :%i correct quorum of correct results from replicas.Initiating reconfiguration" % (
+										clientNumber, maxResponsesPerResult), sep=str_exp, level=log_level)
 									initiateReconfigurationRequest(signedKey,clientNumber,'client')
 
-									if(maxResponsesPerResult >= t + 1):
-										output("But, Client :%i received :%i correct quorum of correct result:%s from replicas" % (
-											clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
-										modifyDictionary(resultWithMaxResponses,
-										                 clientWorkLoadResultDict, operationName, key, value)
-										break
-
 							elif timeout(client_timeout):
+								output("Client :%i Failed to receive the response from all the replicas.Initiating reconfiguration" % (
+									clientNumber), sep=str_exp, level=log_level)
+
+								initiateReconfigurationRequest(signedKey,clientNumber,'client')
+
+								if(maxResponsesPerResult >= t + 1):
+									output("But, Client :%i received :%i correct quorum of correct result:%s from replicas" % (
+										clientNumber, maxResponsesPerResult, resultWithMaxResponses), sep=str_exp, level=log_level)
+									resultReceivedForthisRequest = True
+									modifyDictionary(resultWithMaxResponses,
+									                 clientWorkLoadResultDict, operationName, key, value)
+									
+
+						elif timeout(client_timeout):
 								output('Client :%i hasnot received valid configuration from olympus' %
 								       (clientNumber), sep=str_exp, level=log_level)
-								break
 
-				elif timeout(client_timeout):
-					output('Client :%i hasnot received valid configuration from olympus' %
-					       (clientNumber), sep=str_exp, level=log_level)
+				if resultReceivedForthisRequest == True:
+					loadCounter = loadCounter +1
+					output('client %i workload after request %i is %s' %
+		       	(clientNumber,loadCounter,clientWorkLoadResultDict), sep=str_exp, level=log_level)
 
 
 		output('client %i workload output:%s' %
@@ -148,6 +148,11 @@ class Client(process):
 		if(resultWithMaxResponses == 'OK'):
 			operation = Operation(operationName, key, value)
 			result = operation.performOperation(clientWorkLoadResultDict)
+
+	def receive(msg= ('getconfiguration_response',isValid),from_=_olympus):
+		output('Client %i setting isConfigurationValid to :%s' %
+		       (clientNumber,isValid), sep=str_exp, level=log_level)
+		isConfigurationValid = isValid
 
 	def receive(msg=('client_operation_response', receivedOperationName, receivedOperationId, result, resultProof, c, sender), from_=_tail):
 		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
@@ -179,9 +184,6 @@ class Client(process):
 		signedReq = crypto.sign(privateKey, req)
 			
 		send(('reconfiguration_request', signedReq,index,type), to=olympus)
-
-	def receive(msg=('getconfiguration_response', isValid), from_=_olympus):
-		isConfigurationValid = isValid
 
 	def receive(msg=('configuration_response', replicas, head, tail, c,replicaPublicList,isConfigurationValidOl), from_=_olympus):
 		output('Client %i received :%s: configuration_response from olympus' %
