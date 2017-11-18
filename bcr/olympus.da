@@ -40,6 +40,7 @@ class Olympus(process):
 		self.listOfWedgeStatements = []
 		self.numberOfWedgedResponses = 0
 		self.lastCheckPointAccepted = None
+		self.lastSlotNumberInPrevConfig = -1
 		self.t = config.failure_num
 		self.crytographicHashProcessDict = dict()
 		self.numberOfCaughtUpResponses = 0
@@ -71,7 +72,7 @@ class Olympus(process):
 		output('replica public keys')
 		output(' %s' % (replicaPublicKeysList,))
 		setup(replicas, (self, State.PENDING.value, olympusPublic, clientPublic,
-                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout))
+                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout,lastSlotNumberInPrevConfig))
 		start(replicas)
 		c = logical_clock()
 		numberOfInitHistResp = 0
@@ -135,20 +136,21 @@ class Olympus(process):
 			send(('getconfiguration_response',isConfigurationValid), to=clients)
 			req = 'wedge'
 			signedReq = crypto.sign(olympusPrivate, req)
-			listOfWedgeStatements = []
-			numberOfWedgedResponses = 0
 			
-			send(('wedge', signedReq), to=replicas)
-			output('Olympus sent wedge requests to all replicas', sep = str_exp, level = log_level)
-			
-			if await(numberOfWedgedResponses >= t + 1):
-					time.sleep(2)
-					output('Olympus received the quoram :%i of  wedged responses:%s'%(numberOfWedgedResponses,",".join(str(a) + ',' + str(b) + ',' + str(c) for (a,b,c) in listOfWedgeStatements)), sep = str_exp, level = log_level)
-					
-					listOfWedgeStatements.sort(key=lambda tup:-1*tup[0])
-					output('olympus computing quoram of valid histories', sep = str_exp, level = log_level)
-					start =0
-					while(1):
+			while(1):
+				listOfWedgeStatements = []
+				numberOfWedgedResponses = 0
+				send(('wedge', signedReq), to=replicas)
+				output('Olympus sent wedge requests to all replicas', sep = str_exp, level = log_level)
+				
+				if await(numberOfWedgedResponses >= t + 1):
+						
+						output('Olympus received the quoram :%i of  wedged responses:%s'%(numberOfWedgedResponses,",".join(str(a) + ',' + str(b) + ',' + str(c) for (a,b,c) in listOfWedgeStatements)), sep = str_exp, level = log_level)
+						
+						listOfWedgeStatements.sort(key=lambda tup:-1*tup[0])
+						output('olympus computing quoram of valid histories', sep = str_exp, level = log_level)
+						start =0
+						
 						crytographicHashProcessDict = dict()
 						numberOfCaughtUpResponses = 0
 						receivedRunningState =None
@@ -156,53 +158,55 @@ class Olympus(process):
 						(isValid,quoram) = findConsistentHistories(listOfWedgeStatements)
 						output('olympus found the  quoram:%s of valid histories'%(quoram,), sep = str_exp, level = log_level)
 						i =0
-						while i < len(quoram):
-							process = quoram[i][0]
-							diff = quoram[i][1]
-							signedReq = crypto.sign(olympusPrivate, diff)
-							output('olympus sending the catch_up message to replica:%s'%(process,), sep = str_exp, level = log_level)
-							send(('catch_up', signedReq), to=process)
-							i = i+1
-						
-						output('olympus waiting for the caughtUp responses from replicas', sep = str_exp, level = log_level)
-						if await(numberOfCaughtUpResponses >= t + 1):
-							output('olympus received quoram of caughtUp responses from replicas', sep = str_exp, level = log_level)
-							if(len(crytographicHashProcessDict) == 1):
-								output('all the caughtUp responses have single hash key', sep = str_exp, level = log_level)
-								i=0
-								while i < len(quoram):
-									output('sending out get_running_state message to  process:%s'%(quoram[i][0],), sep = str_exp, level = log_level)
-									send(('get_running_state'), to=quoram[i][0])
-									
-									if(await(receivedRunningState is not None)):
-										output('received running_state message from process:%s'%(quoram[i][0],), sep = str_exp, level = log_level)
-										key = list(crytographicHashProcessDict.keys())[0]
-										if crypto.getHash(receivedRunningState) == key:
-											output('running state hashes matched. Accepting the running state', sep = str_exp, level = log_level)
-											reconfigurationSuccess = True
-											break
+						if(quoram is not None):
+							while i < len(quoram):
+								process = quoram[i][0]
+								diff = quoram[i][1]
+								signedReq = crypto.sign(olympusPrivate, diff)
+								output('olympus sending the catch_up message to replica:%s'%(process,), sep = str_exp, level = log_level)
+								send(('catch_up', signedReq), to=process)
+								i = i+1
 							
-								
+							output('olympus waiting for the caughtUp responses from replicas', sep = str_exp, level = log_level)
+							if await(numberOfCaughtUpResponses >= t + 1):
+								output('olympus received quoram of caughtUp responses from replicas', sep = str_exp, level = log_level)
+								if(len(crytographicHashProcessDict) == 1):
+									output('all the caughtUp responses have single hash key', sep = str_exp, level = log_level)
+									i=0
+									while i < len(quoram):
+										output('sending out get_running_state message to  process:%s'%(quoram[i][0],), sep = str_exp, level = log_level)
+										send(('get_running_state'), to=quoram[i][0])
+										
+										if(await(receivedRunningState is not None)):
+											output('received running_state message from process:%s'%(quoram[i][0],), sep = str_exp, level = log_level)
+											key = list(crytographicHashProcessDict.keys())[0]
+											if crypto.getHash(receivedRunningState) == key:
+												output('running state hashes matched. Accepting the running state', sep = str_exp, level = log_level)
+												reconfigurationSuccess = True
+												break
+									
+										
 							if reconfigurationSuccess:
 								break
-							else:
-								output('Need to find another quoram', sep = str_exp, level = log_level)
+							# else:
+							# 	output('Need to find another quoram', sep = str_exp, level = log_level)
 								
-								output('Removing the hash corresponding to the process with minimum number of count', sep = str_exp, level = log_level)
-								minimumLen = 99999;
-								processToBeRemoved = [];
-								for (k,v) in crytographicHashProcessDict:
-									if len(v) < minimumLen:
-										processToBeRemoved = v
+							# 	output('Removing the hash corresponding to the process with minimum number of count', sep = str_exp, level = log_level)
+							# 	minimumLen = 99999;
+							# 	processToBeRemoved = [];
+							# 	for (k,v) in crytographicHashProcessDict.items():
+							# 		if len(v) < minimumLen:
+							# 			processToBeRemoved = v
 									
 								
-								processToBeRemovedSet = set(processToBeRemoved)
-								listOfWedgeStatementsNew = []
-								for wedgeSt in listOfWedgeStatements:
-									if not wedgeSt[1] in processToBeRemovedSet:
-										listOfWedgeStatementsNew.append(wedgeSt)
+							# 	processToBeRemovedSet = set(processToBeRemoved)
+							# 	listOfWedgeStatementsNew = []
+							# 	for wedgeSt in listOfWedgeStatements:
+							# 		if not wedgeSt[1] in processToBeRemovedSet:
+							# 			listOfWedgeStatementsNew.append(wedgeSt)
 										
-								listOfWedgeStatements = listOfWedgeStatementsNew
+							# 	listOfWedgeStatements = listOfWedgeStatementsNew
+
 
 			createNewReplica()
 
@@ -212,7 +216,25 @@ class Olympus(process):
 			else:
 				output('Reconfiguration already in progress', sep = str_exp, level = log_level)
 
-			
+	def findLastSlot(wedgeSt):
+		lastSlotFromCheckPoint = -1
+		if wedgeSt.checkpoint is not None:
+			lastSlotFromCheckPoint = wedgeSt.checkpoint.checkpointSlot
+
+		histories = wedgeSt.slotOperationHist
+		maxSlot =-1
+		for (k,v) in histories.items():
+			if(k > maxSlot):
+
+				maxSlot = k
+
+		if(lastSlotFromCheckPoint > maxSlot):
+			return lastSlotFromCheckPoint
+		else:
+			return maxSlot
+
+
+
 			
 	def findConsistentHistories(sortedByLongestHistory):
 		
@@ -222,6 +244,8 @@ class Olympus(process):
 			lh = sortedByLongestHistory[start]
 			remaining = sortedByLongestHistory[start+1:]
 			numberOfConsistentHistoriesFound = 1
+			lastCheckPointAccepted = lh[2].checkpoint
+			lastSlotNumberInPrevConfig =  findLastSlot(lh[2])
 			res = []
 			res.append((lh[1],dict()))
 			i =0
@@ -234,19 +258,27 @@ class Olympus(process):
 					res.append((curList[1],diff))
 
 				else :
+					isConsistent = True
 					for (slot,currentClientOp) in curList[2].slotOperationHist.items():
 						clientOpInLH = lh[2].slotOperationHist[slot]
-
+					
 						if clientOpInLH is not None:
-							if (currentClientOp.operationName == clientOpInLH.operationName) and (currentClientOp.operationId == clientOpInLH.operationId) :
-				
-								numberOfConsistentHistoriesFound =numberOfConsistentHistoriesFound + 1
-								diff = { k : lh[2].slotOperationHist[k] for k in set(lh[2].slotOperationHist) - set(curList[2].slotOperationHist) }
-								res.append((curList[1],diff))
 							
+							if (not (currentClientOp.operationName == clientOpInLH.operationName) and (currentClientOp.operationId == clientOpInLH.operationId)) :
+								isConsistent = False
+								break
+								
+						else:
+							isConsistent = False
+							break
+					
+					if isConsistent:
+						numberOfConsistentHistoriesFound =numberOfConsistentHistoriesFound + 1	
+						diff = { k : lh[2].slotOperationHist[k] for k in set(lh[2].slotOperationHist) - set(curList[2].slotOperationHist) }
+						res.append((curList[1],diff))
 				i = i+1
 			
-			if numberOfConsistentHistoriesFound == t+1:
+			if numberOfConsistentHistoriesFound >= t+1:
 				return (True,res)
 			else:
 				start =start + 1

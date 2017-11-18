@@ -10,8 +10,8 @@ class Validations:
         self.crypto = Crypto()
 
     def shouldReplicaAcceptRequest(self, state):
-
-        if state.value is not State.ACTIVE.value:
+        
+        if state.value != State.ACTIVE.value:
             return False
         else:
             return True
