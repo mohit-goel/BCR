@@ -7,8 +7,7 @@ class FailureChecks:
         self.remove_operationhistory = False
         self.crash = False
         self.truncate_history = False
-        self.sleep = False
-        self.sleeptime = 0
+        self.sleep = 0
         self.drop = False
         self.increment_slot = False
         self.extra_op = False
