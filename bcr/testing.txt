@@ -169,7 +169,8 @@ TEST_CASES:
 	workload[0] = put('movie','star'); get('movie')
 	workload[1] = put('movie','star'); append('movie',' wars'); get('movie')
 	workload[2] = put('jedi,'luke skywalker'); slice('jedi','0:4'); get('jedi')
-	failures[0,1] = shuttle(0,0), invalid_order_sig() ; get_running_state(0), drop()
+	failures[0,0] = get_running_state(0), drop()
+	failures[0,1] = shuttle(0,0), drop() ; get_running_state(0), drop()
 	
 	Description: 1 client, 3 replicas. Client sends operation. Head receives operation and modifies dict, sends forward shuttle. All other replicas modify their dict and forward Shuttle. Tail sends result shuttle to client and other replicas. Client verifies result shuttle. 3rd Result is fail because index out of range
 

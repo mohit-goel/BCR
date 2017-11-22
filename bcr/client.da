@@ -25,6 +25,7 @@ ol = import_da('olympus')
 class Client(process):
 
 	def setup(olympus: ol.Olympus, clientNumber: int, signedKey: nacl.signing.SigningKey, olympusPublic: nacl.signing.SigningKey, workload: list, numberOfFailures: int, testCases: TestCases, client_timeout: int):
+		self.olympus = olympus
 		self.q = []
 		self.head = None
 		self.tail = None
@@ -47,6 +48,7 @@ class Client(process):
 		self.clientWorkLoadResultDict = dict()
 		self.resultWithMaxResponses = None
 		self.crypto = Crypto()
+		self.receivedResponse = dict()
 
 	def run():
 		c = logical_clock()
@@ -59,6 +61,7 @@ class Client(process):
 				value = load.value
 				operationName = load.action
 				operationId = operationId + 1
+				self.receivedResponse[operationId] = False
 				c = logical_clock()
 				resultReceivedForthisRequest  = False
 				if await(isConfigurationValid):
@@ -125,6 +128,7 @@ class Client(process):
 								       (clientNumber), sep=str_exp, level=log_level)
 
 				if resultReceivedForthisRequest == True:
+					self.receivedResponse[operationId] = True
 					loadCounter = loadCounter +1
 					output('client %i workload after request %i is %s' %
 		       	(clientNumber,loadCounter,clientWorkLoadResultDict), sep=str_exp, level=log_level)
@@ -140,7 +144,7 @@ class Client(process):
 		       (clientNumber), sep=str_exp, level=log_level)
 		output('client:%i sending done to olympus' %
 		       (clientNumber), sep=str_exp, level=log_level)
-		send(('done', self, clientNumber), to=olympus)
+		send(('done', self, clientNumber), to=self.olympus)
 		output('Client %i terminating' %
 		       (clientNumber), sep=str_exp, level=log_level)
 
@@ -158,25 +162,53 @@ class Client(process):
 		#output('Client:%i received result:%s resultproof:%s from %s'%(clientNumber,result,resultProof,sender), sep = str_exp, level = log_level)
 		output('Client:%i received result:%s from %s' %
 		       (clientNumber, result, sender), sep=str_exp, level=log_level)
-		isValidResponse = validations.responseReceivedWithCorrectOperation(
-			operationName, operationId, receivedOperationName, receivedOperationId)
-		output('Client:%i is operation valid: %s' %
-		       (clientNumber, str(isValidResponse)), sep=str_exp, level=log_level)
-		(isResultValid, reason) = validations.clientValidationOfResultProof(
-			result, resultProof, replicaPublicList, self,t)
-		output('Client:%i %s' % (clientNumber, str(reason)),
-		       sep=str_exp, level=log_level)
-		isValidResponse = isValidResponse and isResultValid
-		numberOfResponses = numberOfResponses + 1
-		if isValidResponse:
-			if result in successfulResponseResultCountDict:
-				successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] + 1
+		
+		if(sender == 'olympus'):
+			output("Sending Result Shuttle response to Olympus")
+			send(('result_shuttle_response', clientNumber ), to=olympus)
+			if (self.receivedResponse[receivedOperationId] == True):
+				output('Client has already received result Shuttle')
 			else:
-				successfulResponseResultCountDict[result] = 1
-
-			if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
-				maxResponsesPerResult = successfulResponseResultCountDict[result]
-				resultWithMaxResponses = result
+				output('Processing started for Olympus result Shuttle')
+				isValidResponse = validations.responseReceivedWithCorrectOperation(
+					operationName, operationId, receivedOperationName, receivedOperationId)
+				output('Client:%i is operation valid: %s' %
+				       (clientNumber, str(isValidResponse)), sep=str_exp, level=log_level)
+				(isResultValid, reason) = validations.clientValidationOfResultProofOlympus(
+					result, resultProof, replicaPublicList, self,t)
+				output('Client:%i %s' % (clientNumber, str(reason)),
+				       sep=str_exp, level=log_level)
+				isValidResponse = isValidResponse and isResultValid
+				numberOfResponses = numberOfResponses + 1
+				if isValidResponse:
+					if result in successfulResponseResultCountDict:
+						successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] + 1
+					else:
+						successfulResponseResultCountDict[result] = 1
+		
+					if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
+						maxResponsesPerResult = successfulResponseResultCountDict[result]
+						resultWithMaxResponses = result
+		else:
+			isValidResponse = validations.responseReceivedWithCorrectOperation(
+				operationName, operationId, receivedOperationName, receivedOperationId)
+			output('Client:%i is operation valid: %s' %
+			       (clientNumber, str(isValidResponse)), sep=str_exp, level=log_level)
+			(isResultValid, reason) = validations.clientValidationOfResultProof(
+				result, resultProof, replicaPublicList, self,t)
+			output('Client:%i %s' % (clientNumber, str(reason)),
+			       sep=str_exp, level=log_level)
+			isValidResponse = isValidResponse and isResultValid
+			numberOfResponses = numberOfResponses + 1
+			if isValidResponse:
+				if result in successfulResponseResultCountDict:
+					successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] + 1
+				else:
+					successfulResponseResultCountDict[result] = 1
+	
+				if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
+					maxResponsesPerResult = successfulResponseResultCountDict[result]
+					resultWithMaxResponses = result
 
 	def initiateReconfigurationRequest(privateKey,index,type):
 		isConfigurationValid = False

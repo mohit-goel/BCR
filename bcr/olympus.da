@@ -49,6 +49,9 @@ class Olympus(process):
 		self.reconfigurationSuccess = False
 		self.numberOfInitHistResp = 0
 		self.clients = clients
+		self.olympus_timeout = 1
+		self.replicaClientResultStDict = dict()
+		self.resultShuttleResponse = 0
 	
 		
 	def createNewReplica():
@@ -152,7 +155,7 @@ class Olympus(process):
 				send(('wedge', signedReq), to=replicas)
 				output('Olympus sent wedge requests to all replicas', sep = str_exp, level = log_level)
 				
-				if await(numberOfWedgedResponses >= t + 1):
+				if await((numberOfWedgedResponses >= t + 1)):
 						
 						output('Olympus received the quoram :%i of  wedged responses:%s'%(numberOfWedgedResponses,",".join(str(a) + ',' + str(b) + ',' + str(c) for (a,b,c) in listOfWedgeStatements)), sep = str_exp, level = log_level)
 						
@@ -167,6 +170,7 @@ class Olympus(process):
 						(isValid,quoram) = findConsistentHistories(listOfWedgeStatements)
 						output('olympus found the  quoram:%s of valid histories'%(quoram,), sep = str_exp, level = log_level)
 						i =0
+						self.replicaClientResultStDict.clear()
 						if(quoram is not None):
 							while i < len(quoram):
 								process = quoram[i][0]
@@ -191,8 +195,11 @@ class Olympus(process):
 											key = list(crytographicHashProcessDict.keys())[0]
 											if crypto.getHash(receivedRunningState) == key:
 												output('running state hashes matched. Accepting the running state', sep = str_exp, level = log_level)
+												sendResultShuttleToClients()
 												reconfigurationSuccess = True
 												break
+										elif timeout(self.olympus_timeout):
+											i = i+1
 									
 										
 							if reconfigurationSuccess:
@@ -241,8 +248,32 @@ class Olympus(process):
 			return lastSlotFromCheckPoint
 		else:
 			return maxSlot
+	
+	def sendResultShuttleToClients():
+		output("olympus creating result shuttle for clients")
+		sendShuttle = False
+		sendShuttleNum = 0
+		for i in range(len(clientPublic)):
+			resultProof = ResultProof([],'',0)
+			for j in range(len(self.replicaPublicKeysList)):
+				if j in self.replicaClientResultStDict:
+					resultStDict = self.replicaClientResultStDict[j]
+					if i in resultStDict:
+						sendShuttle = True
+						(result,resultSt) = resultStDict[i]
+						resultProof.operationName = resultSt.operationName
+						resultProof.operationId = resultSt.operationId
+						resultProof.addStatement(resultSt)
+						output("Result statement is %s for replica:%i client:%i" % (resultSt,j,i))
 
-
+			if (sendShuttle == True) and (len(resultProof.getlistOfResultSt()) >= (self.t+1)) :
+				sendShuttleNum = sendShuttleNum + 1
+				output("Olympus Sending result shuttle to client %i, %s " % (i, str(clients[i])))					
+				send(('client_operation_response', resultProof.operationName, resultProof.operationId,
+					result, resultProof, '', 'olympus'), to=clients[i])
+		
+		if await((self.resultShuttleResponse == sendShuttleNum)):
+			self.resultShuttleResponse = 0	
 
 			
 	def findConsistentHistories(sortedByLongestHistory):
@@ -294,15 +325,18 @@ class Olympus(process):
 				
 		return (False,None)
 	
-	def receive(msg=('caught_up', caughtUp,index,type), from_=p):
+	def receive(msg=('caught_up', caughtUp,signedResultStDict,index,type), from_=p):
 	
 		msg = crypto.isSignatureVerified(getPublicKey(index,type),caughtUp)
+		resultStDict = crypto.isSignatureVerified(getPublicKey(index,type),signedResultStDict)
+		
 		if msg != None:
 			output('Olympus received caughtUp message containing runningStateHash :%s from replica:%s'%(msg,index,), sep = str_exp, level = log_level)
 			if msg in crytographicHashProcessDict:
 				crytographicHashProcessDict[msg].append(p)
 			else:
 				crytographicHashProcessDict[msg] = [p]
+			self.replicaClientResultStDict[index] = resultStDict
 
 			numberOfCaughtUpResponses = numberOfCaughtUpResponses +1
 		else:
@@ -333,3 +367,7 @@ class Olympus(process):
 			numberOfWedgedResponses = numberOfWedgedResponses +1
 		else:
 			output('WedgeStatement not signed by correct replica', sep = str_exp, level = log_level)
+			
+	def receive(msg=('result_shuttle_response', clientNumber), from_=client):
+		output('Olympus received resultSuttle from Client:%i'%(clientNumber), sep = str_exp, level = log_level)
+		self.resultShuttleResponse = self.resultShuttleResponse + 1

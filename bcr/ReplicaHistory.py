@@ -10,6 +10,7 @@ class ReplicaHistory:
         self.slotRunningStateHashDict = dict()
         self.lastCheckpointProof = None
         self.lastCheckpointSlot = -1
+        self.clientResultStDict = dict()
 
     def insertOperation(self, operation,clientRequest, localResult, slot):
         self.operationStateDict[operation] = OperationState(localResult, slot)
@@ -43,7 +44,17 @@ class ReplicaHistory:
             return (True, operationState.get_slot())
         else:
             return (False, -1)
+    
+    def getResultStForClient(self, client):
+        if client in self.clientResultStDict:
+            (result,resultSt) = self.clientResultStDict(client)
+            return resultSt
+        else:
+            return None
 
+    def setResultStForClient(self, client,result, resultSt):
+        self.clientResultStDict[client] = (result,resultSt)
+        
     def getResultShuttleForOperation(self, operation):
         if operation in self.operationStateDict:
             operationState = self.operationStateDict.get(operation)

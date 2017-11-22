@@ -137,6 +137,7 @@ class Replica(process):
 			resultHash, operationName, operationId, index)
 		output('Replica:%i result statement [result_hash,operationName,operationId,replicaId]:%s is signed,appended to result Proof' % (
 			index, resultStatement))
+		self.replicaHistory.setResultStForClient(clientNumber,result,resultStatement)
 		signedSerializedResultStatements = crypto.sign(
 			replicakeyPrivateR, resultStatement)
 		shuttle.addResultStatement(signedSerializedResultStatements)
@@ -408,16 +409,23 @@ class Replica(process):
 				self.failureChecks.drop = False
 			
 			else:
+				copiedClientResultStDict =  dict()
+				copiedClientResultStDict = {key:replicaHistory.clientResultStDict[key] for key in replicaHistory.clientResultStDict.keys()}
 				copiedRunningState = {key:runningState[key] for key in runningState.keys()}
 				for (k,v) in msg.items():
 					op = Operation(v.operationName,v.key,v.value)
 					result = op.performOperation(copiedRunningState)
+					resultHash = crypto.getHash(result)
+					resultStatement = ResultStatement(
+						resultHash, v.operationName, v.operationId, index)
+					copiedClientResultStDict[v.clientNumber] = (result,resultStatement)
 					
-				
+				output("Result statements is %s for operations executed in catch_up message of replica:%i" % (copiedClientResultStDict, index))
 				runningStateHash = crypto.getHash(self.copiedRunningState)
 			
-				signedReq = crypto.sign(replicaPrivate, runningStateHash)
-				send(('caught_up', signedReq,index,'replica'), to=olympus)
+				signedReq = crypto.sign(replicaPrivate, (runningStateHash))
+				signedResultStDict = crypto.sign(replicaPrivate, (copiedClientResultStDict))
+				send(('caught_up', signedReq,signedResultStDict,index,'replica'), to=olympus)
 
 		else:
 			output('Replica:%i received catch_up but signature not valid'%(index,), sep=str_exp, level=log_level)

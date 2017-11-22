@@ -52,6 +52,20 @@ class Validations:
             return (True, "Result Proof is valid")
         else:
             return (True, "Result Proof is notvalid: quoram not found")
+        
+    def clientValidationOfResultProofOlympus(self, result, resultProof, replicaPublicList, proc,t):
+
+        resultStList = resultProof.getlistOfResultSt()
+        numberOfResultStMatched = 0
+        for i in range(len(resultStList)):
+            decodeSt = resultStList[i]
+            if (not self.crypto.verifyHashes(result, decodeSt.result)):
+                numberOfResultStMatched+=1
+            
+        if numberOfResultStMatched >= t+1:
+            return (True, "Result Proof is valid")
+        else:
+            return (True, "Result Proof is Valid")  
             
 
 
