@@ -36,14 +36,14 @@ ol = import_da('olympus')
 
 class Replica(process):
 
-	def setup(olympus: ol.Olympus, state: State, olympusPublic: nacl.signing.SigningKey, clientPublic: list, replicaPublic: list, replicaPrivate: list, nonhead_timeout: int,lastSlotNumberInPrevConfig:int):
+	def setup(olympus: ol.Olympus, state: State, olympusPublic: nacl.signing.SigningKey, clientPublic: list, replicaPublic: list, replicaPrivate: list, nonhead_timeout: int,lastSlotNumberInPrevConfig:int, failure_num:int, checkpt_interval:int):
 		self.isHead = False
 		self.isTail = False
 		self.prevReplica = None
 		self.nextReplica = None
 		self.runningState = None
 		self.configuration = -1
-		self.config = 1
+		self.failure_num = failure_num
 		self.head = None
 		self.upTime = logical_clock()
 		self.state = state
@@ -60,12 +60,13 @@ class Replica(process):
 		self.replicaPublic = None
 		self.validations = Validations()
 		self.replicaHistory = ReplicaHistory()
+		self.replicaHistory.lastCheckpointSlot =  lastSlotNumberInPrevConfig
 		self.failcase = []
 		self.messageNumber = MessageNumber()
 		self.crypto = Crypto()
 		self.failureChecks = FailureChecks()
 		self.hasReceivedDone = False
-		self.checkpt_interval = 5
+		self.checkpt_interval = checkpt_interval
 		self.copiedRunningState = dict()
 
 	def actionsAtEveryReplica(operationName, key, value, operationId, client, slot, shuttle, clientNumber, messageType, clientRequest):
@@ -81,8 +82,8 @@ class Replica(process):
 		resultDict[(operationId, client)] = result
 		
 		# To store runningstate Hash at every checkpoint interval
-		if(slot == 4):
-		#if((slot+1)%checkpt_interval == 0):
+		#if(slot == 4):
+		if((slot+1)%checkpt_interval == 0):
 			runningStateHash = crypto.getHash(self.runningState)
 			replicaHistory.addRunningStateHash(slot,runningStateHash)
 			output('Checkpoint :Running State Hash:%s is created for running state:%s and stored in history at slot %i for Replica:%i' % (runningStateHash,self.runningState,slot, index))
@@ -158,7 +159,7 @@ class Replica(process):
 			if i in history:
 				del history[i]
 		self.replicaHistory.slotOperationDict = history
-		output('Truncated History is %s after checkpointing at slot %i for replica:%i\n' % (",".join(str(k) +"=" + str(v) for (k,v) in self.replicaHistory.slotOperationDict.items()), slot, index))
+		output('Truncated History is {%s} after checkpointing at slot %i for replica:%i\n' % (",".join(str(k) +"=" + str(v) for (k,v) in self.replicaHistory.slotOperationDict.items()), slot, index))
 		self.replicaHistory.lastCheckpointSlot = slot
 
 		
@@ -375,26 +376,60 @@ class Replica(process):
 	def receive(msg=('catch_up', signedReq)):
 		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
 		if msg != None:
-			output('Replica:%i received catch_up:%s from olympus:%s'%(index,msg,type(msg)), sep=str_exp, level=log_level)
+			messagetype = MessageTypes.CATCH_UP
+			messageNumber.incrementReplicaMessageType(messagetype)
+			#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
+			output('Replica:%i received %s th catch_up:%s from olympus:%s'%(index,str(
+				messageNumber.getReplicaMessageTypeCount(messagetype)),msg,type(msg)), sep=str_exp, level=log_level)
+			output('Replica:%i {message_type>messagecount} is %s\n, {client:{message_type>messagecount} is :%s' %
+			       (index, messageNumber.getReplicaDict(), messageNumber.getDict()))
 
-			copiedRunningState = {key:runningState[key] for key in runningState.keys()}
-			for (k,v) in msg.items():
-				op = Operation(v.operationName,v.key,v.value)
-				result = op.performOperation(copiedRunningState)
-				
+			failurecase = FailureCase(
+				failcase, index, -1, messagetype, messageNumber, failureChecks)
+			self.failureChecks = failurecase.failureChecks
+			output('Failure trigger is %s , failure checks is %s for the catch_up:%s  in Replica:%i' % (
+				failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount( messagetype)), index))
 			
-			runningStateHash = crypto.getHash(self.copiedRunningState)
-		
-			signedReq = crypto.sign(replicaPrivate, runningStateHash)
-			send(('caught_up', signedReq,index,'replica'), to=olympus)
+			if (self.failureChecks.drop == True):
+				output("Dropping received message due to failure scenario")
+				self.failureChecks.drop = False
+			
+			else:
+				copiedRunningState = {key:runningState[key] for key in runningState.keys()}
+				for (k,v) in msg.items():
+					op = Operation(v.operationName,v.key,v.value)
+					result = op.performOperation(copiedRunningState)
+					
+				
+				runningStateHash = crypto.getHash(self.copiedRunningState)
+			
+				signedReq = crypto.sign(replicaPrivate, runningStateHash)
+				send(('caught_up', signedReq,index,'replica'), to=olympus)
 
 		else:
 			output('Replica:%i received catch_up but signature not valid'%(index,), sep=str_exp, level=log_level)
 	
 	def receive(msg=('get_running_state')):
 		
-			output('Replica:%i received get_running_state from olympus'%(index,), sep=str_exp, level=log_level)
+		messagetype = MessageTypes.GET_RUNNUNG_STATE
+		messageNumber.incrementReplicaMessageType(messagetype)
+		#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
+		output('Replica:%i received get_running_state:%s from olympus'%(index,str(
+			messageNumber.getReplicaMessageTypeCount(messagetype))), sep=str_exp, level=log_level)
+		output('Replica:%i {message_type>messagecount} is %s\n, {client:{message_type>messagecount} is :%s' %
+	       (index, messageNumber.getReplicaDict(), messageNumber.getDict()))
+
+		failurecase = FailureCase(
+			failcase, index, -1, messagetype, messageNumber, failureChecks)
+		self.failureChecks = failurecase.failureChecks
+		output('Failure trigger is %s , failure checks is %s for the get_running_state:%s  in Replica:%i' % (
+			failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount( messagetype)), index))
 		
+		if (self.failureChecks.drop == True):
+			output("Dropping received message due to failure scenario")
+			self.failureChecks.drop = False
+			
+		else:
 			signedReq = crypto.sign(replicaPrivate, copiedRunningState)
 			send(('running_state', signedReq,index,'replica'), to=olympus)
 			
@@ -411,15 +446,38 @@ class Replica(process):
 	def receive(msg=('wedge', signedReq)):
 		msg = crypto.isSignatureVerified(olympusPublic,signedReq)
 		if msg != None:
-			output('Replica:%i received wedge request from olympus'%(index,), sep=str_exp, level=log_level)
+			messagetype = MessageTypes.WEDGE_REQUEST
+			messageNumber.incrementReplicaMessageType(messagetype)
+			output('Replica:%i received wedge request:%s  from Olympus' % (index, str(
+				messageNumber.getReplicaMessageTypeCount(messagetype))), sep=str_exp, level=log_level)
+			#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
+			output('Replica:%i {client:{message_type>messagecount} is :%s' %
+			       (index, messageNumber.getDict()))
 
-			wedgedSt = WedgedStatement(replicaHistory.lastCheckpointProof,replicaHistory.slotOperationDict)
+			failurecase = FailureCase(
+				failcase, index, -1, messagetype, messageNumber, failureChecks)
+			self.failureChecks = failurecase.failureChecks
+			output('Failure trigger is %s , failure checks is %s for the wedge_request:%s  in Replica:%i' % (
+				failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount(messagetype)), index))
+			
+			if (self.failureChecks.drop == True):
+				output("Dropping received message due to failure scenario")
+				self.failureChecks.drop = False
+			
+			else:
 
-			signedReq = crypto.sign(replicaPrivate, wedgedSt)
-			self.state = State.IMMUTABLE
-			output('Replica:%i changed its state  to IMMUTABLE'%(index,), sep=str_exp, level=log_level)
-			output('Replica:%i sending its wedged statement:%s to olympus'%(index,wedgedSt), sep=str_exp, level=log_level)
-			send(('wedged', signedReq,index,'replica'), to=olympus)
+				wedgedSt = WedgedStatement(replicaHistory.lastCheckpointProof,replicaHistory.slotOperationDict)			
+				if (self.failureChecks.truncate_history == True):
+					if (len(wedgedSt)>0):
+						del wedgedSt[-1]
+					self.failureChecks.truncate_history = False
+					output('Replica:%i modified its wedge statement due to failure scenario'%(index,), sep=str_exp, level=log_level)
+	
+				signedReq = crypto.sign(replicaPrivate, wedgedSt)
+				self.state = State.IMMUTABLE
+				output('Replica:%i changed its state  to IMMUTABLE'%(index,), sep=str_exp, level=log_level)
+				output('Replica:%i sending its wedged statement:%s to olympus'%(index,wedgedSt), sep=str_exp, level=log_level)
+				send(('wedged', signedReq,index,'replica'), to=olympus)
 	
 		else:
 			output('Replica:%i received wedge request but signature not valid'%(index,), sep=str_exp, level=log_level)
@@ -493,6 +551,10 @@ class Replica(process):
 			return True
 
 	def validateCheckpointBackwardShuttle(slot, shuttle):
+		#((self.replicaHistory.lastCheckpointSlot == -1) and ((slot - self.replicaHistory.lastCheckpointSlot + 1) > self.checkpt_interval)) or
+		if ((slot - self.replicaHistory.lastCheckpointSlot) > self.checkpt_interval):
+			output("Completed Checkpoint Proof validation fail : Completed Checkpoint Proof of previous slot has not arrived")
+			return False
 		if (len(shuttle.listOfCheckpointSt) < (len(replicaPublicList))):
 			output("Completed Checkpoint Proof validation fail : Checkpoint Statement of some replica missing")
 			return False
@@ -603,8 +665,8 @@ class Replica(process):
 		
 					if isHead:
 						output('backward shuttle reached head')
-						if(slot == 4):
-						#if((slot+1)%checkpt_interval == 0):
+						#if(slot == 4):
+						if((slot+1)%checkpt_interval == 0):
 							createCheckpointShuttle(slot)
 					else:
 						shuttle = self.failureResultCheck(shuttle)
@@ -624,7 +686,7 @@ class Replica(process):
 			       (index, messageNumber.getReplicaDict()))
 
 			failurecase = FailureCase(
-				failcase, index, 0, messagetype, messageNumber, failureChecks)
+				failcase, index, -1, messagetype, messageNumber, failureChecks)
 			self.failureChecks = failurecase.failureChecks
 			output('Failure trigger is %s , failure checks is %s for the checkpoint forward shuttle:%s slot:%i in Replica:%i' % (
 				failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount(messagetype)), slot, index))
@@ -675,7 +737,7 @@ class Replica(process):
 			       (index, messageNumber.getReplicaDict()))
 
 			failurecase = FailureCase(
-				failcase, index, 0, messagetype, messageNumber, failureChecks)
+				failcase, index, -1, messagetype, messageNumber, failureChecks)
 			self.failureChecks = failurecase.failureChecks
 			output('Failure trigger is %s , failure checks is %s for the completed checkpoint proof shuttle:%s slot:%i in Replica:%i' % (
 				failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount(messagetype)), slot, index))
@@ -699,7 +761,8 @@ class Replica(process):
 					truncateHistory(slot)
 					self.replicaHistory.lastCheckpointProof = checkpointshuttle
 					if (self.failureChecks.drop_checkpt_stmts == True):
-						checkpointshuttle.listOfCheckpointSt = checkpointshuttle.listOfCheckpointSt[self.config :]
+						checkpointshuttle.listOfCheckpointSt = checkpointshuttle.listOfCheckpointSt[self.failure_num :]
+						output('Replica:%i modified the completed checkpoint Proof due to failure scenario'%(index,), sep=str_exp, level=log_level)
 						self.failureChecks.drop_checkpt_stmts = False
 
 					if(isHead):
@@ -711,8 +774,7 @@ class Replica(process):
 
 
 	def receive(msg=('inithist', running_State, replicas, head, tail, index, c, configuration, failcase), from_=_olympus, at=(yieldInitHist,)):
-		output('replica %i received inithist from olympus runningState:%s  slot:%i' %
-		       (index,running_State,lastSlotNumberInPrevConfig), sep=str_exp, level=log_level)
+		
 		self.head = head
 		self.runningState = running_State
 		self.replicaChain = replicas
@@ -721,18 +783,40 @@ class Replica(process):
 		self.replicaPublic = replicaPublicList[index]
 		self.configuration = configuration
 		self.failcase = failcase
+		
+		messagetype = MessageTypes.NEW_CONFIGURATION
+		messageNumber.incrementReplicaMessageType(messagetype)
+		#messageNumber.getClientMessageTypeCount(clientNumber,messagetype)
+		output('Replica:%i received init_hist:%s from olympus'%(index,str(
+			messageNumber.getReplicaMessageTypeCount(messagetype))), sep=str_exp, level=log_level)
+		output('Replica:%i {message_type>messagecount} is %s\n, {client:{message_type>messagecount} is :%s' %
+	       (index, messageNumber.getReplicaDict(), messageNumber.getDict()))
 
-		if(index == 0):
-			self.isHead = True
-			self.nextReplica = replicaChain[index + 1]
-			output("Replica %i is head" % (index,), sep=str_exp, level=log_level)
-
-		elif(index == len(replicaChain) - 1):
-			self.isTail = True
-			self.prevReplica = replicaChain[index - 1]
-			output("Replica %i is tail" % (index,), sep=str_exp, level=log_level)
+		failurecase = FailureCase(
+			failcase, index, -1, messagetype, messageNumber, failureChecks)
+		self.failureChecks = failurecase.failureChecks
+		output('Failure trigger is %s , failure checks is %s for the init_hist:%s  in Replica:%i' % (
+			failurecase, self.failureChecks, str(messageNumber.getReplicaMessageTypeCount( messagetype)), index))
+			
+		if (self.failureChecks.drop == True):
+			output("Dropping received message due to failure scenario")
+			self.failureChecks.drop = False
+			
 		else:
-			self.prevReplica = replicaChain[index - 1]
-			self.nextReplica = replicaChain[index + 1]
-		self.state = State.ACTIVE
-		send(('inithist_response', self), to=olympus)
+			output('replica %i received inithist from olympus runningState:%s  slot:%i' %
+			       (index,running_State,lastSlotNumberInPrevConfig), sep=str_exp, level=log_level)
+	
+			if(index == 0):
+				self.isHead = True
+				self.nextReplica = replicaChain[index + 1]
+				output("Replica %i is head" % (index,), sep=str_exp, level=log_level)
+	
+			elif(index == len(replicaChain) - 1):
+				self.isTail = True
+				self.prevReplica = replicaChain[index - 1]
+				output("Replica %i is tail" % (index,), sep=str_exp, level=log_level)
+			else:
+				self.prevReplica = replicaChain[index - 1]
+				self.nextReplica = replicaChain[index + 1]
+			self.state = State.ACTIVE
+			send(('inithist_response', self), to=olympus)

@@ -14,7 +14,6 @@ class FailureCase:
         self.failureChecks = failureChecks
 
         for fail in failcase:
-            print(self.messageType)
             if (fail.condition == "client_request") and (self.messageType == MessageTypes.DIRECT):
                 if (fail.client == self.clientNumber) and (fail.requestnum == messageNumber.clientMessageTypeCountDict[self.clientNumber][self.messageType]):
                     self.failure = fail.condition + \

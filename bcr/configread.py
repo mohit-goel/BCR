@@ -15,9 +15,11 @@ class configread:
         self.replica_host = dict()
         self.failure = dict()
         self.pseudorandom_workload = dict()
+        self.checkpt_interval = 1
 
         with open(input_file) as f:
             for line in f:
+                line = line.strip()
                 if line[0] != '#':
                     (key, sep, val) = line.partition('=')
                     key = key.strip()

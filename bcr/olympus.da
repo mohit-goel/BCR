@@ -42,6 +42,7 @@ class Olympus(process):
 		self.lastCheckPointAccepted = None
 		self.lastSlotNumberInPrevConfig = -1
 		self.t = config.failure_num
+		self.checkpt_interval = config.checkpt_interval
 		self.crytographicHashProcessDict = dict()
 		self.numberOfCaughtUpResponses = 0
 		self.receivedRunningState = dict()
@@ -72,7 +73,7 @@ class Olympus(process):
 		output('replica public keys')
 		output(' %s' % (replicaPublicKeysList,))
 		setup(replicas, (self, State.PENDING.value, olympusPublic, clientPublic,
-                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout,lastSlotNumberInPrevConfig))
+                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout,lastSlotNumberInPrevConfig, self.t, self.checkpt_interval ))
 		start(replicas)
 		c = logical_clock()
 		numberOfInitHistResp = 0
