@@ -53,46 +53,55 @@ class Olympus(process):
 		
 	def createNewReplica():
 	
-		if len(replicas) !=0 : 
-			send(('kill'), to=replicas)
+		reconfigSuccessful = False
+		while(not reconfigSuccessful):
+			if len(replicas) !=0 : 
+				send(('kill'), to=replicas)
+				
+				
+			replicas = new(rl.Replica, num=nReplicas)
+			replicas = list(replicas)
+			configuration = configuration + 1
+			self.head = replicas[0]
+			self.tail = replicas[nReplicas - 1]
+			self.replicaPublicKeysList=[]
+			self.replicaPrivateKeysList=[]
+			for i in range(nReplicas):
+				(private, public) = crypto.getSignedKey()
+				self.replicaPrivateKeysList.append(private)
+				self.replicaPublicKeysList.append(public)
+			output('replica private keys')
+			output(' %s' % (replicaPrivateKeysList,))
+			output('replica public keys')
+			output(' %s' % (replicaPublicKeysList,))
+			setup(replicas, (self, State.PENDING.value, olympusPublic, clientPublic,
+	                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout,lastSlotNumberInPrevConfig, self.t, self.checkpt_interval ))
+			start(replicas)
+			c = logical_clock()
+			numberOfInitHistResp = 0
+			for i in range(nReplicas):
+				failcase = []
+				if (configuration, i) in failure.keys():
+					failcase = failure[(configuration, i)]
+				send(('inithist', receivedRunningState, replicas, head, tail,
+	                            i, c, configuration, failcase), to=replicas[i])
+				output("Message inithist sent to replica %i" %
+				       (i,), sep=str_exp, level=log_level)
 			
+			if await((self.numberOfInitHistResp == len(replicas))):
+				output('Olympus received enough number of inithist_responses:%i.Setting configuration to valid' %
+			       (numberOfInitHistResp,), sep=str_exp, level=log_level)
+				self.isConfigurationValid = True
+				output('Olympus sending configuration response to clients %s' %
+			       (clients,), sep=str_exp, level=log_level)
+				send(('configuration_response', replicas, head, tail, logical_clock(),self.replicaPublicKeysList,isConfigurationValid), to=clients)
+				reconfigSuccessful = True
 			
-		replicas = new(rl.Replica, num=nReplicas)
-		replicas = list(replicas)
-		configuration = configuration + 1
-		self.head = replicas[0]
-		self.tail = replicas[nReplicas - 1]
-		self.replicaPublicKeysList=[]
-		self.replicaPrivateKeysList=[]
-		for i in range(nReplicas):
-			(private, public) = crypto.getSignedKey()
-			self.replicaPrivateKeysList.append(private)
-			self.replicaPublicKeysList.append(public)
-		output('replica private keys')
-		output(' %s' % (replicaPrivateKeysList,))
-		output('replica public keys')
-		output(' %s' % (replicaPublicKeysList,))
-		setup(replicas, (self, State.PENDING.value, olympusPublic, clientPublic,
-                   replicaPublicKeysList, replicaPrivateKeysList, nonhead_timeout,lastSlotNumberInPrevConfig, self.t, self.checkpt_interval ))
-		start(replicas)
-		c = logical_clock()
-		numberOfInitHistResp = 0
-		for i in range(nReplicas):
-			failcase = []
-			if (configuration, i) in failure.keys():
-				failcase = failure[(configuration, i)]
-			send(('inithist', receivedRunningState, replicas, head, tail,
-                            i, c, configuration, failcase), to=replicas[i])
-			output("Message inithist sent to replica %i" %
-			       (i,), sep=str_exp, level=log_level)
-		
-		if await((self.numberOfInitHistResp == len(replicas))):
-			output('Olympus received enough number of inithist_responses:%i.Setting configuration to valid' %
-		       (numberOfInitHistResp,), sep=str_exp, level=log_level)
-			self.isConfigurationValid = True
-			output('Olympus sending configuration response to clients %s' %
-		       (clients,), sep=str_exp, level=log_level)
-			send(('configuration_response', replicas, head, tail, logical_clock(),self.replicaPublicKeysList,isConfigurationValid), to=clients)
+			elif timeout(10):
+				output('Olympus: timeout out waiting inithist responses from replica. Sending inithist again'
+				    , sep=str_exp, level=log_level)
+			
+
 			
 	def receive(msg=('inithist_response', replica), from_=p):
 		
