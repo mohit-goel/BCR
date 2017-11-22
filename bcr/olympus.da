@@ -97,7 +97,7 @@ class Olympus(process):
 				send(('configuration_response', replicas, head, tail, logical_clock(),self.replicaPublicKeysList,isConfigurationValid), to=clients)
 				reconfigSuccessful = True
 			
-			elif timeout(10):
+			elif timeout(3):
 				output('Olympus: timeout out waiting inithist responses from replica. Sending inithist again'
 				    , sep=str_exp, level=log_level)
 			
@@ -119,13 +119,12 @@ class Olympus(process):
 		await(each(client in clients, has=some(received(('done', _client, _)))))
 		output('olympus received done from all clients')
 		output('olympus sending  done to all replicas')
-		send(('done',), to=replicas)
-		await(each(replica in replicas, has=some(received(('done', _replica)))))
+		send(('done'), to=replicas)
+		await(each(replica in replicas, has=some(received(('donereplica',_replica)))))
 		output('olympus received  done from all replicas')
-		send(('done',), to=parent())
+		send(('doneolympus',), to=parent())
 
 		output('Olympus process is getting closed', sep=str_exp, level=log_level)
-
 
 	
 	def getPublicKey(index,type):

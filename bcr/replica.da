@@ -68,6 +68,7 @@ class Replica(process):
 		self.hasReceivedDone = False
 		self.checkpt_interval = checkpt_interval
 		self.copiedRunningState = dict()
+		self.timeToTerminate = False
 
 	def actionsAtEveryReplica(operationName, key, value, operationId, client, slot, shuttle, clientNumber, messageType, clientRequest):
 
@@ -169,15 +170,27 @@ class Replica(process):
 		signedReq = crypto.sign(privateKey, req)			
 		send(('reconfiguration_request', signedReq,index,type), to=olympus)
 
+	def receive(msg=('done')):
+		
+			output('Replica:%i received done from olympus'%(index,), sep=str_exp, level=log_level)
+			send(('donereplica',self), to=olympus)
+			output('replica send done to olympus')
+			self.timeToTerminate = True
+			self.state = State.IMMUTABLE
+			output('replica%i time to terminate:%s,state:%s'%(index,timeToTerminate,state),sep=str_exp, level=log_level)
+			os._exit(-1)
+			
+
+
 	def run():
 		output('Starting Replica', sep=str_exp, level=log_level)
 		-- yieldInitHist
 		await(some(received(('inithist', _, _, _, _, _, c2), from_=olympus)))
 
-		await(received(('done',), from_=olympus))
-		output('replica received  done from olympus')
-		send(('done', self), to=olympus)
-		output('replica send  done to olympus')
+		if await(self.timeToTerminate == True):
+			output('Replica:%i Terminating'%(index,), sep=str_exp, level=log_level)
+
+		
 
 	def generateResponseFromResultShuttle(operationName, key, value, client, operationId, clock, clientNumber):
 		(status, shuttle) = replicaHistory.getResultShuttleForOperation(

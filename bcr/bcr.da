@@ -1,6 +1,7 @@
 import sys
 config(channel is {fifo, reliable}, clock is lamport)
 from enum import Enum
+import time
 import nacl.encoding
 import nacl.signing
 from OrderProof import OrderProof
@@ -24,6 +25,7 @@ rl = import_da('replica')
 
 
 def main():
+	start_time = time.time() 
 	if len(sys.argv) > 1:
 		config = configread(sys.argv[1])
 		output('configuration parameters are read from file')
@@ -74,5 +76,8 @@ def main():
 	output('master waiting  done from  olympus')
 	#await(received(('done',), from_=olympus))
 
-	await(some(received(('done',), from_=olympus)))
-	output('master received  done from  olympus')
+	await(some(received(('doneolympus',), from_=olympus)))
+	output('master received  done from  olympus.Terminating')
+	end_time = time.time()
+	output('elapsed time (seconds):%i'%(end_time - start_time,), sep=str_exp, level=log_level)
+	
