@@ -199,8 +199,7 @@ class Olympus(process):
 												reconfigurationSuccess = True
 												break
 										elif timeout(self.olympus_timeout):
-											i = i+1
-									
+											i = i+1								
 										
 							if reconfigurationSuccess:
 								break
@@ -261,6 +260,7 @@ class Olympus(process):
 					if i in resultStDict:
 						sendShuttle = True
 						(result,resultSt) = resultStDict[i]
+						#if (resultProof.operationId <= resultSt.operationId)
 						resultProof.operationName = resultSt.operationName
 						resultProof.operationId = resultSt.operationId
 						resultProof.addStatement(resultSt)
@@ -271,6 +271,7 @@ class Olympus(process):
 				output("Olympus Sending result shuttle to client %i, %s " % (i, str(clients[i])))					
 				send(('client_operation_response', resultProof.operationName, resultProof.operationId,
 					result, resultProof, '', 'olympus'), to=clients[i])
+				sendShuttle = False
 		
 		if await((self.resultShuttleResponse == sendShuttleNum)):
 			self.resultShuttleResponse = 0	

@@ -174,12 +174,12 @@ class Replica(process):
 	def receive(msg=('done')):
 		
 			output('Replica:%i received done from olympus'%(index,), sep=str_exp, level=log_level)
-			send(('donereplica',self), to=olympus)
-			output('replica send done to olympus')
-			self.timeToTerminate = True
-			self.state = State.IMMUTABLE
-			output('replica%i time to terminate:%s,state:%s'%(index,timeToTerminate,state),sep=str_exp, level=log_level)
-			os._exit(-1)
+			#send(('donereplica',self), to=olympus)
+			#output('replica send done to olympus')
+			#self.timeToTerminate = True
+			#self.state = State.IMMUTABLE
+			#output('replica%i time to terminate:%s,state:%s'%(index,timeToTerminate,state),sep=str_exp, level=log_level)
+			#os._exit(-1)
 			
 
 

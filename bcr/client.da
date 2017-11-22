@@ -179,12 +179,12 @@ class Client(process):
 				output('Client:%i %s' % (clientNumber, str(reason)),
 				       sep=str_exp, level=log_level)
 				isValidResponse = isValidResponse and isResultValid
-				numberOfResponses = numberOfResponses + 1
+				numberOfResponses == 2 * self.t + 1
 				if isValidResponse:
 					if result in successfulResponseResultCountDict:
 						successfulResponseResultCountDict[result] = successfulResponseResultCountDict[result] + 1
 					else:
-						successfulResponseResultCountDict[result] = 1
+						successfulResponseResultCountDict[result] = t + 1
 		
 					if(maxResponsesPerResult < successfulResponseResultCountDict[result]):
 						maxResponsesPerResult = successfulResponseResultCountDict[result]
