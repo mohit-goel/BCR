@@ -46,12 +46,12 @@ def main():
 		clientPublic.append(public)
 
 
-	clients = new(cl.Client, num=nclients)
+	clients = new(cl.Client, num=nclients,at='ClientNode')
 	clients = list(clients)
 	masterDict = dict()
 	testCases = TestCases(config.test_case_name, masterDict)
 
-	olympus = new(ol.Olympus, num=1)
+	olympus = new(ol.Olympus, num=1,at='OlympusNode')
 	for i in range(nclients):
 		masterDict = dict()
 		if config.test_case_name == 'stresstest':

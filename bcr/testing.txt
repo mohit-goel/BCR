@@ -51,11 +51,13 @@ CONFIGURATION FILES:
 
 To run Multi Host:
 	Commands:  (these are to be set while demo)
-	python3 -m da --logfile --logfilename logdirect/replica.log --logfilelevel info -n ReplicaNode --hostname 172.25.90.11 --peer 172.25.82.132 -D replica.da
-	python3 -m da --logfile --logfilename logdirect/client.log --logfilelevel info  -n ClientNode --hostname 172.25.82.132 --peer 172.25.90.11  -D client.da
-	python3 -m da --logfile --logfilename logdirect/olympus.log --logfilelevel info  -n OlympusNode --hostname 172.25.82.132  --peer 172.25.90.11 -D olympus.da
 	
-	python3 -m da --logfile --logfilename logdirect/master.log --logfilelevel info  -n MasterNode --hostname 172.25.82.132 --peer 172.25.90.11 bcr.da
+	python3 -m da -r  --message-buffer-size=1280000 --logfile --logfilename logdirect/replica0.log --logfilelevel info -n ReplicaNode0  -D replica.da
+	python3 -m da -r  --message-buffer-size=1280000 --logfile --logfilename logdirect/replica1.log --logfilelevel info -n ReplicaNode1  -D replica.da
+	python3 -m da -r  --message-buffer-size=1280000 --logfile --logfilename logdirect/replica2.log --logfilelevel info -n ReplicaNode2  -D replica.da
+	python3 -m da -r --message-buffer-size=1280000 --logfile --logfilename logdirect/client.log --logfilelevel info  -n ClientNode   -D client.da
+	python3 -m da -r  --message-buffer-size=1280000  --logfile --logfilename logdirect/olympus.log --logfilelevel info  -n OlympusNode  -D olympus.da
+	python3 -m da -r  --message-buffer-size=1280000  --logfile --logfilename logdirect/master.log --logfilelevel info  -n MasterNode  bcr.da perform900.txt
 
 python3 -m da --logfile --logfilename test_1_log.txt  --logfilelevel 'info' --message-buffer-size 90000 bcr.da test_1.txt
 python3 -m da --logfile --logfilename test_2_log.txt  --logfilelevel 'info' --message-buffer-size 90000 bcr.da test_2.txt

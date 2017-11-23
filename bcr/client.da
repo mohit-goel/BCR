@@ -1,5 +1,5 @@
 import sys
-config(channel is fifo, clock is lamport)
+config(channel is {fifo, reliable}, clock is lamport)
 from enum import Enum
 import nacl.encoding
 import nacl.signing

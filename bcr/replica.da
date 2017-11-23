@@ -5,7 +5,7 @@ import os
 import time
 from ensurepip import _disable_pip_configuration_settings
 from lib2to3.pgen2.token import GREATEREQUAL
-config(channel is fifo, clock is lamport)
+config(channel is {fifo, reliable}, clock is lamport)
 from enum import Enum
 import nacl.encoding
 import nacl.signing
