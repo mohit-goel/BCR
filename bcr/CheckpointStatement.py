@@ -1,4 +1,4 @@
-class CheckpointStatement   :
+class CheckpointStatement:
 
     def __init__(self, slot, runningStateHash):
         self.checkpointSlot = slot
@@ -9,4 +9,4 @@ class CheckpointStatement   :
         return self.slot
 
     def __str__(self):
-        return '[' + 'checkpointSlot:' + str(self.checkpointSlot) + ","  + 'runningStateHash:' + str(self.runningStateHash) + ","  + "]"
+        return '[' + 'checkpointSlot:' + str(self.checkpointSlot) + "," + 'runningStateHash:' + str(self.runningStateHash) + "," + "]"

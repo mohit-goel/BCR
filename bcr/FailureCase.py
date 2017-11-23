@@ -106,7 +106,6 @@ class FailureCase:
         elif action.startswith('sleep'):
             number = re.findall(r'\d+', action)
             self.failureChecks.sleep = int(number[0])
-        
 
     def __str__(self):
         return str(self.failure)

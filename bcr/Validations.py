@@ -10,7 +10,7 @@ class Validations:
         self.crypto = Crypto()
 
     def shouldReplicaAcceptRequest(self, state):
-        
+
         if state.value != State.ACTIVE.value:
             return False
         else:
@@ -33,8 +33,8 @@ class Validations:
                 return (False, "Result proof validation fail: Result doesn't match Result Stmt of some replica")
 
         return (True, "Result Proof is valid")
-    
-    def clientValidationOfResultProof(self, result, resultProof, replicaPublicList, proc,t):
+
+    def clientValidationOfResultProof(self, result, resultProof, replicaPublicList, proc, t):
         if len(resultProof.getlistOfResultSt()) < (len(replicaPublicList)):
             return (False, "Result Proof validation fail: Result Statement of some replica missing")
 
@@ -46,28 +46,26 @@ class Validations:
             decodeSt = self.crypto.isSignatureVerified(
                 currentKey, currentEncodedSt)
             if (not ((decodeSt is None) or (not self.crypto.verifyHashes(result, decodeSt.result)))):
-                numberOfResultStMatched+=1
-            
-        if numberOfResultStMatched >= t+1:
+                numberOfResultStMatched += 1
+
+        if numberOfResultStMatched >= t + 1:
             return (True, "Result Proof is valid")
         else:
             return (True, "Result Proof is notvalid: quoram not found")
-        
-    def clientValidationOfResultProofOlympus(self, result, resultProof, replicaPublicList, proc,t):
+
+    def clientValidationOfResultProofOlympus(self, result, resultProof, replicaPublicList, proc, t):
 
         resultStList = resultProof.getlistOfResultSt()
         numberOfResultStMatched = 0
         for i in range(len(resultStList)):
             decodeSt = resultStList[i]
             if (not self.crypto.verifyHashes(result, decodeSt.result)):
-                numberOfResultStMatched+=1
-            
-        if numberOfResultStMatched >= t+1:
+                numberOfResultStMatched += 1
+
+        if numberOfResultStMatched >= t + 1:
             return (True, "Result Proof is valid")
         else:
-            return (True, "Result Proof is Valid")  
-            
-
+            return (True, "Result Proof is Valid")
 
     def responseReceivedWithCorrectOperation(self, operationName, operationId, receivedOperationName, receivedOperationId):
         return (operationName == receivedOperationName) and (operationId == receivedOperationId)

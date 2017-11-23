@@ -113,10 +113,10 @@ class configread:
                                     y = re.split(',', x)
                                     cond = y[0].strip()
                                     action = y[3].strip()
-                                    if len(number) >2:
+                                    if len(number) > 2:
                                         sleeptime = int(number[2])
-                                        action = action + str(sleeptime)                                
-                                        
+                                        action = action + str(sleeptime)
+
                                 else:
                                     number = re.findall(r'\d+', x)
                                     client = -1
@@ -126,14 +126,13 @@ class configread:
                                     y = re.split(',', x)
                                     cond = y[0].strip()
                                     action = y[2].strip()
-                                    if len(number) >1:
+                                    if len(number) > 1:
                                         sleeptime = int(number[1])
                                         action = action + str(sleeptime)
-                                
+
                                 f = FailureObj(cond, client, req, action)
                                 self.failure[(i, j)].append(f)
-                                    
-                                    
+
                                 #number = re.findall(r'\d+', x)
                                 #client = int(number[0])
                                 #req = int(number[1])

@@ -10,7 +10,6 @@ class CheckpointShuttle:
     def getListOfCheckpointSt(self):
         return self.listOfCheckpointSt
 
-
     def addCheckpointStatement(self, st):
         self.listOfCheckpointSt.append(st)
 

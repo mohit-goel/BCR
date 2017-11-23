@@ -12,7 +12,7 @@ class ReplicaHistory:
         self.lastCheckpointSlot = -1
         self.clientResultStDict = dict()
 
-    def insertOperation(self, operation,clientRequest, localResult, slot):
+    def insertOperation(self, operation, clientRequest, localResult, slot):
         self.operationStateDict[operation] = OperationState(localResult, slot)
         self.slotOperationDict[slot] = clientRequest
 
@@ -44,17 +44,17 @@ class ReplicaHistory:
             return (True, operationState.get_slot())
         else:
             return (False, -1)
-    
+
     def getResultStForClient(self, client):
         if client in self.clientResultStDict:
-            (result,resultSt) = self.clientResultStDict(client)
+            (result, resultSt) = self.clientResultStDict(client)
             return resultSt
         else:
             return None
 
-    def setResultStForClient(self, client,result, resultSt):
-        self.clientResultStDict[client] = (result,resultSt)
-        
+    def setResultStForClient(self, client, result, resultSt):
+        self.clientResultStDict[client] = (result, resultSt)
+
     def getResultShuttleForOperation(self, operation):
         if operation in self.operationStateDict:
             operationState = self.operationStateDict.get(operation)
@@ -73,18 +73,17 @@ class ReplicaHistory:
     def setLocalResultForOperation(self, operation, result):
         operationState = self.operationStateDict.get(operation)
         operationState.set_result_shuttle(result)
-        
-        
-    def removeOperation(self,operation):
+
+    def removeOperation(self, operation):
         try:
             self.operationStateDict.pop(operation)
         except:
             print('error while removing operation')
-    
-    def addRunningStateHash(self,slot,runningStateHash):
+
+    def addRunningStateHash(self, slot, runningStateHash):
         self.slotRunningStateHashDict[slot] = runningStateHash
-    
-    def getRunningStateHash(self,slot):
+
+    def getRunningStateHash(self, slot):
         if slot in self.slotRunningStateHashDict:
             return self.slotRunningStateHashDict[slot]
         else:
@@ -93,29 +92,28 @@ class ReplicaHistory:
     def __str__(self):
         res = []
         res.append('\n')
-        
+
         res.append("operationStateDict=")
 
         for k, v in self.operationStateDict.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
         res.append('\n')
-        
+
         res.append("slotOperationDict=")
 
         for k, v in self.slotOperationDict.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
-        
+
         res.append("slotRunnungStateHashDict=")
 
         for k, v in self.slotRunningStateHashDict.items():
             res.append(str(k) + "=" + str(v))
             res.append('\n')
-        
+
         res.append("lastCheckpointProof=")
         res.append(str(lastCheckpointProof))
         res.append('\n')
-        
 
         return ",".join(res)
