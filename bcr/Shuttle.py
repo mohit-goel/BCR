@@ -1,24 +1,20 @@
 class Shuttle:
-    
-    def __init__(self,resultProof,orderProof):
+
+    def __init__(self, resultProof, orderProof):
         self.resultProof = resultProof
         self.orderProof = orderProof
-        
+
     def getResultProof(self):
         return self.resultProof
-    
+
     def getOrderProof(self):
         return self.orderProof
-    
-    def addOrderStatement(self,orderStatement):
-        self.orderProof.addStatement(orderStatement)        
-        
-        
-    def addResultStatement(self,resultStatement):
+
+    def addOrderStatement(self, orderStatement):
+        self.orderProof.addStatement(orderStatement)
+
+    def addResultStatement(self, resultStatement):
         self.resultProof.addStatement(resultStatement)
-        
+
     def __str__(self):
-     return 'resultProof:' + str(self.resultProof) + "\n orderProof:" + str(self.orderProof)
-        
-        
-        
+        return 'resultProof:' + str(self.resultProof) + "\n orderProof:" + str(self.orderProof)

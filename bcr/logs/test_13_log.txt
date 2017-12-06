@@ -1,0 +1,362 @@
+[2017-10-22 23:09:46,201] da.api<MainProcess>:INFO: <Node_:a5001> initialized at 127.0.0.1:(UdpTransport=22456, TcpTransport=28547).
+[2017-10-22 23:09:46,201] da.api<MainProcess>:INFO: Starting program <module 'bcr' from '/Users/nikithakandru/Desktop/Async/BCR/bcr/bcr.py'>...
+[2017-10-22 23:09:46,201] da.api<MainProcess>:INFO: Running iteration 1 ...
+[2017-10-22 23:09:46,202] da.api<MainProcess>:INFO: Waiting for remaining child processes to terminate...(Press "Ctrl-C" to force kill)
+[2017-10-22 23:09:46,206] bcr.Node_<Node_:a5001>:OUTPUT: configuration parameters are read from file
+[2017-10-22 23:09:46,207] bcr.Node_<Node_:a5001>:OUTPUT: replica private keys
+[2017-10-22 23:09:46,207] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.SigningKey object at 0x1033c0f98>, <nacl.signing.SigningKey object at 0x1033dc048>, <nacl.signing.SigningKey object at 0x1033dc0b8>, <nacl.signing.SigningKey object at 0x1033dc128>, <nacl.signing.SigningKey object at 0x1033dc198>]
+[2017-10-22 23:09:46,207] bcr.Node_<Node_:a5001>:OUTPUT: replica public keys
+[2017-10-22 23:09:46,207] bcr.Node_<Node_:a5001>:OUTPUT:  [<nacl.signing.VerifyKey object at 0x1033c0fd0>, <nacl.signing.VerifyKey object at 0x1033dc080>, <nacl.signing.VerifyKey object at 0x1033dc0f0>, <nacl.signing.VerifyKey object at 0x1033dc160>, <nacl.signing.VerifyKey object at 0x1033dc1d0>]
+[2017-10-22 23:09:46,279] olympus.Olympus<Olympus:34804>:INFO: Starting Olympus
+[2017-10-22 23:09:46,287] client.Client<Client:34802>:INFO: Client 1 asking for configuration from  Olympus
+[2017-10-22 23:09:46,288] client.Client<Client:34803>:INFO: Client 0 asking for configuration from  Olympus
+[2017-10-22 23:09:46,359] replica.Replica<Replica:34807>:INFO: Starting Replica
+[2017-10-22 23:09:46,359] replica.Replica<Replica:34808>:INFO: Starting Replica
+[2017-10-22 23:09:46,360] replica.Replica<Replica:34809>:INFO: Starting Replica
+[2017-10-22 23:09:46,361] replica.Replica<Replica:34805>:INFO: Starting Replica
+[2017-10-22 23:09:46,361] replica.Replica<Replica:34806>:INFO: Starting Replica
+[2017-10-22 23:09:46,362] olympus.Olympus<Olympus:34804>:INFO: Message inithist sent to replica 0
+[2017-10-22 23:09:46,363] replica.Replica<Replica:34807>:INFO: replica 0 received inithist from olympus
+[2017-10-22 23:09:46,363] olympus.Olympus<Olympus:34804>:INFO: Message inithist sent to replica 1
+[2017-10-22 23:09:46,363] replica.Replica<Replica:34807>:INFO: Replica 0 is head
+[2017-10-22 23:09:46,364] olympus.Olympus<Olympus:34804>:INFO: Message inithist sent to replica 2
+[2017-10-22 23:09:46,364] olympus.Olympus<Olympus:34804>:INFO: Message inithist sent to replica 3
+[2017-10-22 23:09:46,365] replica.Replica<Replica:34808>:INFO: replica 1 received inithist from olympus
+[2017-10-22 23:09:46,365] olympus.Olympus<Olympus:34804>:INFO: Message inithist sent to replica 4
+[2017-10-22 23:09:46,365] replica.Replica<Replica:34809>:INFO: replica 2 received inithist from olympus
+[2017-10-22 23:09:46,365] olympus.Olympus<Olympus:34804>:INFO: Olympus received configuration_request from client 1
+[2017-10-22 23:09:46,365] olympus.Olympus<Olympus:34804>:INFO: Olympus received configuration_request from client 0
+[2017-10-22 23:09:46,366] replica.Replica<Replica:34805>:INFO: replica 3 received inithist from olympus
+[2017-10-22 23:09:46,366] replica.Replica<Replica:34806>:INFO: replica 4 received inithist from olympus
+[2017-10-22 23:09:46,366] replica.Replica<Replica:34806>:INFO: Replica 4 is tail
+[2017-10-22 23:09:46,367] olympus.Olympus<Olympus:34804>:INFO: Olympus sending configuration response to client 0
+[2017-10-22 23:09:46,369] olympus.Olympus<Olympus:34804>:INFO: Olympus sending configuration response to client 1
+[2017-10-22 23:09:46,369] client.Client<Client:34803>:INFO: Client 0 received configuration_response from olympus
+[2017-10-22 23:09:46,371] client.Client<Client:34802>:INFO: Client 1 received configuration_response from olympus
+[2017-10-22 23:09:46,373] client.Client<Client:34803>:INFO: Client 0 sent (operationName,operationId,key,value):(put,1,movie,star) to head
+[2017-10-22 23:09:46,373] replica.Replica<Replica:34807>:INFO: Replica:0 received client_operation_request:0 from client:0 
+[2017-10-22 23:09:46,374] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{0: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 23:09:46,374] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 0 in Replica:0
+[2017-10-22 23:09:46,375] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 23:09:46,375] replica.Replica<Replica:34807>:OUTPUT: result of operation is OK for Replica:0
+[2017-10-22 23:09:46,375] replica.Replica<Replica:34807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[0,put,1,0] is signed,appended to order Proof
+[2017-10-22 23:09:46,376] client.Client<Client:34802>:INFO: Client 1 sent (operationName,operationId,key,value):(get,1,movie,None) to head
+[2017-10-22 23:09:46,377] replica.Replica<Replica:34807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,0] is signed,appended to result Proof
+[2017-10-22 23:09:46,379] replica.Replica<Replica:34807>:OUTPUT: Forward Shuttle sent from head for Client:0
+[2017-10-22 23:09:46,380] replica.Replica<Replica:34807>:INFO: Replica:0 received client_operation_request:0 from client:1 
+[2017-10-22 23:09:46,381] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{0: {<MessageTypes.DIRECT: 0>: 0}, 1: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 23:09:46,381] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 0 in Replica:0
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'star'} OperationName:get OperationId:1 ]
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34807>:OUTPUT: result of operation is star for Replica:0
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[1,get,1,0] is signed,appended to order Proof
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34808>:INFO: Replica:1 received forward shuttle:0 for client:0
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,1,0] is signed,appended to result Proof
+[2017-10-22 23:09:46,382] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,383] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is shuttle(0,0),change_result() , failure checks is  change_oper=False change_result=True drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:1
+[2017-10-22 23:09:46,383] replica.Replica<Replica:34807>:OUTPUT: Forward Shuttle sent from head for Client:1
+[2017-10-22 23:09:46,383] replica.Replica<Replica:34808>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:1
+[2017-10-22 23:09:46,384] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 23:09:46,384] replica.Replica<Replica:34808>:OUTPUT: result of operation is OK for Replica:1
+[2017-10-22 23:09:46,384] replica.Replica<Replica:34808>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[0,put,1,1] is signed,appended to order Proof
+[2017-10-22 23:09:46,385] replica.Replica<Replica:34808>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,1] is signed,appended to result Proof
+[2017-10-22 23:09:46,386] replica.Replica<Replica:34808>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,387] replica.Replica<Replica:34808>:INFO: Replica:1 received forward shuttle:0 for client:1
+[2017-10-22 23:09:46,387] replica.Replica<Replica:34809>:INFO: Replica:2 received forward shuttle:0 for client:0
+[2017-10-22 23:09:46,387] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,387] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,387] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=True drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:1
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:2
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34808>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:1
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'star'} OperationName:get OperationId:1 ]
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34808>:OUTPUT: result of operation is star for Replica:1
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34808>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[1,get,1,1] is signed,appended to order Proof
+[2017-10-22 23:09:46,388] replica.Replica<Replica:34809>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:2
+[2017-10-22 23:09:46,389] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 23:09:46,389] replica.Replica<Replica:34808>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,1,1] is signed,appended to result Proof
+[2017-10-22 23:09:46,389] replica.Replica<Replica:34809>:OUTPUT: result of operation is OK for Replica:2
+[2017-10-22 23:09:46,389] replica.Replica<Replica:34809>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[0,put,1,2] is signed,appended to order Proof
+[2017-10-22 23:09:46,391] replica.Replica<Replica:34808>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,391] replica.Replica<Replica:34809>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,2] is signed,appended to result Proof
+[2017-10-22 23:09:46,393] replica.Replica<Replica:34809>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,394] replica.Replica<Replica:34809>:INFO: Replica:2 received forward shuttle:0 for client:1
+[2017-10-22 23:09:46,394] replica.Replica<Replica:34805>:INFO: Replica:3 received forward shuttle:0 for client:0
+[2017-10-22 23:09:46,394] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,395] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:2
+[2017-10-22 23:09:46,395] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,395] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:3
+[2017-10-22 23:09:46,395] replica.Replica<Replica:34809>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:2
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'star'} OperationName:get OperationId:1 ]
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34809>:OUTPUT: result of operation is star for Replica:2
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34809>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[1,get,1,2] is signed,appended to order Proof
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34805>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:3
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34809>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,1,2] is signed,appended to result Proof
+[2017-10-22 23:09:46,396] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 23:09:46,397] replica.Replica<Replica:34805>:OUTPUT: result of operation is OK for Replica:3
+[2017-10-22 23:09:46,397] replica.Replica<Replica:34805>:OUTPUT: Replica:3 order statement [slot,operationName,operationId,replicaId]:[0,put,1,3] is signed,appended to order Proof
+[2017-10-22 23:09:46,397] replica.Replica<Replica:34809>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,397] replica.Replica<Replica:34805>:OUTPUT: Replica:3 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,3] is signed,appended to result Proof
+[2017-10-22 23:09:46,399] replica.Replica<Replica:34805>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,399] replica.Replica<Replica:34805>:INFO: Replica:3 received forward shuttle:0 for client:1
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:3
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34806>:INFO: Replica:4 received forward shuttle:0 for client:0
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34806>:OUTPUT: Replica:4 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:0 in Replica:4
+[2017-10-22 23:09:46,400] replica.Replica<Replica:34805>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:3
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'star'} OperationName:get OperationId:1 ]
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34805>:OUTPUT: result of operation is star for Replica:3
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34805>:OUTPUT: Replica:3 order statement [slot,operationName,operationId,replicaId]:[1,get,1,3] is signed,appended to order Proof
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34805>:OUTPUT: Replica:3 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,1,3] is signed,appended to result Proof
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34806>:OUTPUT: Forward Shuttle:0 for Client:0 passed validation at Replica:4
+[2017-10-22 23:09:46,401] replica.Replica<Replica:34806>:INFO: [Replica:4 runningState:{'movie': 'star'} OperationName:put OperationId:1 ]
+[2017-10-22 23:09:46,402] replica.Replica<Replica:34806>:OUTPUT: result of operation is OK for Replica:4
+[2017-10-22 23:09:46,402] replica.Replica<Replica:34805>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,402] replica.Replica<Replica:34806>:OUTPUT: Replica:4 order statement [slot,operationName,operationId,replicaId]:[0,put,1,4] is signed,appended to order Proof
+[2017-10-22 23:09:46,403] replica.Replica<Replica:34806>:OUTPUT: Replica:4 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,1,4] is signed,appended to result Proof
+[2017-10-22 23:09:46,404] replica.Replica<Replica:34806>:OUTPUT: client result shuttle sent from tail to client:0
+[2017-10-22 23:09:46,404] client.Client<Client:34803>:INFO: Client:0 received result:OK from <Replica:34806>
+[2017-10-22 23:09:46,405] client.Client<Client:34803>:INFO: Client:0 is operation valid: True
+[2017-10-22 23:09:46,405] replica.Replica<Replica:34806>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34805>:INFO: Replica:3 received backward shuttle:0 for client:0
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34806>:INFO: Replica:4 received forward shuttle:0 for client:1
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:3
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34806>:OUTPUT: Replica:4 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,406] replica.Replica<Replica:34806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:0 client:1 in Replica:4
+[2017-10-22 23:09:46,406] client.Client<Client:34803>:INFO: Client:0 Result Proof is valid
+[2017-10-22 23:09:46,407] client.Client<Client:34803>:INFO: Client:0 received VALID result
+[2017-10-22 23:09:46,407] replica.Replica<Replica:34805>:OUTPUT: Result Proof is valid for Replica:3
+[2017-10-22 23:09:46,407] client.Client<Client:34803>:INFO: Client 0 sent (operationName,operationId,key,value):(slice,2,movie,1:4) to head
+[2017-10-22 23:09:46,407] replica.Replica<Replica:34805>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:3
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34806>:OUTPUT: Forward Shuttle:0 for Client:1 passed validation at Replica:4
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'star'} OperationName:put OperationId:1]
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34806>:INFO: [Replica:4 runningState:{'movie': 'star'} OperationName:get OperationId:1 ]
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34806>:OUTPUT: result of operation is star for Replica:4
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34806>:OUTPUT: Replica:4 order statement [slot,operationName,operationId,replicaId]:[1,get,1,4] is signed,appended to order Proof
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34807>:INFO: Replica:0 received client_operation_request:1 from client:0 
+[2017-10-22 23:09:46,408] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{0: {<MessageTypes.DIRECT: 0>: 1}, 1: {<MessageTypes.DIRECT: 0>: 0}}
+[2017-10-22 23:09:46,409] replica.Replica<Replica:34806>:OUTPUT: Replica:4 result statement [result_hash,operationName,operationId,replicaId]:[b'6b06ac1727d0c4a1a0f73572e0f1c7cdc6aec0ad5a4580035b225fa66fb21560',get,1,4] is signed,appended to result Proof
+[2017-10-22 23:09:46,409] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 1 in Replica:0
+[2017-10-22 23:09:46,409] replica.Replica<Replica:34805>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'tar'} OperationName:slice OperationId:2 ]
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34807>:OUTPUT: result of operation is OK for Replica:0
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[2,slice,2,0] is signed,appended to order Proof
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34809>:INFO: Replica:2 received backward shuttle:0 for client:0
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',slice,2,0] is signed,appended to result Proof
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,410] replica.Replica<Replica:34806>:OUTPUT: client result shuttle sent from tail to client:1
+[2017-10-22 23:09:46,411] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is result_shuttle(0,0),change_result() , failure checks is  change_oper=False change_result=True drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:2
+[2017-10-22 23:09:46,411] client.Client<Client:34802>:INFO: Client:1 received result:star from <Replica:34806>
+[2017-10-22 23:09:46,411] replica.Replica<Replica:34807>:OUTPUT: Forward Shuttle sent from head for Client:0
+[2017-10-22 23:09:46,411] replica.Replica<Replica:34806>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 23:09:46,411] client.Client<Client:34802>:INFO: Client:1 is operation valid: True
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34808>:INFO: Replica:1 received forward shuttle:1 for client:0
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34805>:INFO: Replica:3 received backward shuttle:0 for client:1
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34809>:OUTPUT: Result Proof is valid for Replica:2
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,412] replica.Replica<Replica:34809>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:2
+[2017-10-22 23:09:46,413] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:3
+[2017-10-22 23:09:46,413] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'star'} OperationName:put OperationId:1]
+[2017-10-22 23:09:46,413] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=True drop_result=False change_privatekey=False for the forward shuttle:1 client:0 in Replica:1
+[2017-10-22 23:09:46,413] client.Client<Client:34802>:INFO: Client:1 Result Proof is valid
+[2017-10-22 23:09:46,413] replica.Replica<Replica:34808>:OUTPUT: Forward Shuttle:1 for Client:0 passed validation at Replica:1
+[2017-10-22 23:09:46,413] replica.Replica<Replica:34809>:OUTPUT: Result Shuttle modified in Replica:2
+[2017-10-22 23:09:46,413] client.Client<Client:34802>:INFO: Client:1 received VALID result
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'tar'} OperationName:slice OperationId:2 ]
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34805>:OUTPUT: Result Proof is valid for Replica:3
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34808>:OUTPUT: result of operation is OK for Replica:1
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34805>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:3
+[2017-10-22 23:09:46,414] client.Client<Client:34802>:INFO: Client 1 sent (operationName,operationId,key,value):(put,2,movie,stars) to head
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34808>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[2,slice,2,1] is signed,appended to order Proof
+[2017-10-22 23:09:46,414] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'star'} OperationName:get OperationId:1]
+[2017-10-22 23:09:46,415] replica.Replica<Replica:34808>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',slice,2,1] is signed,appended to result Proof
+[2017-10-22 23:09:46,415] replica.Replica<Replica:34805>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,415] replica.Replica<Replica:34808>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,415] replica.Replica<Replica:34807>:INFO: Replica:0 received client_operation_request:1 from client:1 
+[2017-10-22 23:09:46,416] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount} is :{0: {<MessageTypes.DIRECT: 0>: 1}, 1: {<MessageTypes.DIRECT: 0>: 1}}
+[2017-10-22 23:09:46,416] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks:  change_oper=False change_result=False drop_result=False change_privatekey=False for the client_operation_request 1 in Replica:0
+[2017-10-22 23:09:46,416] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:put OperationId:2 ]
+[2017-10-22 23:09:46,416] replica.Replica<Replica:34807>:OUTPUT: result of operation is OK for Replica:0
+[2017-10-22 23:09:46,416] replica.Replica<Replica:34807>:OUTPUT: Replica:0 order statement [slot,operationName,operationId,replicaId]:[3,put,2,0] is signed,appended to order Proof
+[2017-10-22 23:09:46,417] replica.Replica<Replica:34809>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,417] replica.Replica<Replica:34807>:OUTPUT: Replica:0 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,2,0] is signed,appended to result Proof
+[2017-10-22 23:09:46,417] replica.Replica<Replica:34807>:OUTPUT: Forward Shuttle sent from head for Client:1
+[2017-10-22 23:09:46,417] replica.Replica<Replica:34809>:INFO: Replica:2 received backward shuttle:0 for client:1
+[2017-10-22 23:09:46,418] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,418] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:2
+[2017-10-22 23:09:46,419] replica.Replica<Replica:34808>:INFO: Replica:1 received backward shuttle:0 for client:0
+[2017-10-22 23:09:46,419] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,419] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=True drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:1
+[2017-10-22 23:09:46,419] replica.Replica<Replica:34809>:OUTPUT: Result Proof is valid for Replica:2
+[2017-10-22 23:09:46,420] replica.Replica<Replica:34809>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:2
+[2017-10-22 23:09:46,420] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'star'} OperationName:get OperationId:1]
+[2017-10-22 23:09:46,420] replica.Replica<Replica:34809>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,421] replica.Replica<Replica:34809>:INFO: Replica:2 received forward shuttle:1 for client:0
+[2017-10-22 23:09:46,421] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,421] replica.Replica<Replica:34808>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 23:09:46,421] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:0 in Replica:2
+[2017-10-22 23:09:46,422] replica.Replica<Replica:34808>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:1
+[2017-10-22 23:09:46,422] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'tar'} OperationName:put OperationId:1]
+[2017-10-22 23:09:46,422] replica.Replica<Replica:34809>:OUTPUT: Forward Shuttle:1 for Client:0 passed validation at Replica:2
+[2017-10-22 23:09:46,422] replica.Replica<Replica:34808>:OUTPUT: Result Shuttle modified in Replica:1
+[2017-10-22 23:09:46,423] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'tar'} OperationName:slice OperationId:2 ]
+[2017-10-22 23:09:46,423] replica.Replica<Replica:34809>:OUTPUT: result of operation is OK for Replica:2
+[2017-10-22 23:09:46,423] replica.Replica<Replica:34809>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[2,slice,2,2] is signed,appended to order Proof
+[2017-10-22 23:09:46,423] replica.Replica<Replica:34809>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',slice,2,2] is signed,appended to result Proof
+[2017-10-22 23:09:46,424] replica.Replica<Replica:34809>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,424] replica.Replica<Replica:34808>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34808>:INFO: Replica:1 received forward shuttle:1 for client:1
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34805>:INFO: Replica:3 received forward shuttle:1 for client:0
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 1}}
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 0, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:1
+[2017-10-22 23:09:46,425] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:0 in Replica:3
+[2017-10-22 23:09:46,426] replica.Replica<Replica:34808>:OUTPUT: Forward Shuttle:1 for Client:1 passed validation at Replica:1
+[2017-10-22 23:09:46,426] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'stars'} OperationName:put OperationId:2 ]
+[2017-10-22 23:09:46,426] replica.Replica<Replica:34808>:OUTPUT: result of operation is OK for Replica:1
+[2017-10-22 23:09:46,426] replica.Replica<Replica:34805>:OUTPUT: Forward Shuttle:1 for Client:0 passed validation at Replica:3
+[2017-10-22 23:09:46,426] replica.Replica<Replica:34808>:OUTPUT: Replica:1 order statement [slot,operationName,operationId,replicaId]:[3,put,2,1] is signed,appended to order Proof
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34808>:OUTPUT: Replica:1 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,2,1] is signed,appended to result Proof
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'tar'} OperationName:slice OperationId:2 ]
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34807>:INFO: Replica:0 received backward shuttle:0 for client:0
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34805>:OUTPUT: result of operation is OK for Replica:3
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34805>:OUTPUT: Replica:3 order statement [slot,operationName,operationId,replicaId]:[2,slice,2,3] is signed,appended to order Proof
+[2017-10-22 23:09:46,428] replica.Replica<Replica:34805>:OUTPUT: Replica:3 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',slice,2,3] is signed,appended to result Proof
+[2017-10-22 23:09:46,428] replica.Replica<Replica:34809>:INFO: Replica:2 received forward shuttle:1 for client:1
+[2017-10-22 23:09:46,428] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.DIRECT: 0>: 1}}
+[2017-10-22 23:09:46,428] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:2
+[2017-10-22 23:09:46,429] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:0 in Replica:0
+[2017-10-22 23:09:46,429] replica.Replica<Replica:34809>:OUTPUT: Forward Shuttle:1 for Client:1 passed validation at Replica:2
+[2017-10-22 23:09:46,429] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'stars'} OperationName:put OperationId:2 ]
+[2017-10-22 23:09:46,429] replica.Replica<Replica:34809>:OUTPUT: result of operation is OK for Replica:2
+[2017-10-22 23:09:46,430] replica.Replica<Replica:34809>:OUTPUT: Replica:2 order statement [slot,operationName,operationId,replicaId]:[3,put,2,2] is signed,appended to order Proof
+[2017-10-22 23:09:46,430] replica.Replica<Replica:34809>:OUTPUT: Replica:2 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,2,2] is signed,appended to result Proof
+[2017-10-22 23:09:46,430] replica.Replica<Replica:34807>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 23:09:46,430] replica.Replica<Replica:34807>:OUTPUT: Backward Shuttle:0 for client:0 passed validation at Replica:0
+[2017-10-22 23:09:46,430] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:put OperationId:1]
+[2017-10-22 23:09:46,431] replica.Replica<Replica:34807>:OUTPUT: backward shuttle reached head
+[2017-10-22 23:09:46,431] replica.Replica<Replica:34809>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,427] replica.Replica<Replica:34808>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34808>:INFO: Replica:1 received backward shuttle:0 for client:1
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34806>:INFO: Replica:4 received forward shuttle:1 for client:0
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:1
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34806>:OUTPUT: Replica:4 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 0}}
+[2017-10-22 23:09:46,432] replica.Replica<Replica:34806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:0 in Replica:4
+[2017-10-22 23:09:46,433] replica.Replica<Replica:34806>:OUTPUT: Forward Shuttle:1 for Client:0 passed validation at Replica:4
+[2017-10-22 23:09:46,428] replica.Replica<Replica:34805>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,433] replica.Replica<Replica:34808>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 23:09:46,436] replica.Replica<Replica:34805>:INFO: Replica:3 received forward shuttle:1 for client:1
+[2017-10-22 23:09:46,436] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,436] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:3
+[2017-10-22 23:09:46,437] replica.Replica<Replica:34805>:OUTPUT: Forward Shuttle:1 for Client:1 passed validation at Replica:3
+[2017-10-22 23:09:46,437] replica.Replica<Replica:34806>:INFO: [Replica:4 runningState:{'movie': 'tar'} OperationName:slice OperationId:2 ]
+[2017-10-22 23:09:46,437] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'stars'} OperationName:put OperationId:2 ]
+[2017-10-22 23:09:46,437] replica.Replica<Replica:34806>:OUTPUT: result of operation is OK for Replica:4
+[2017-10-22 23:09:46,438] replica.Replica<Replica:34805>:OUTPUT: result of operation is OK for Replica:3
+[2017-10-22 23:09:46,438] replica.Replica<Replica:34806>:OUTPUT: Replica:4 order statement [slot,operationName,operationId,replicaId]:[2,slice,2,4] is signed,appended to order Proof
+[2017-10-22 23:09:46,438] replica.Replica<Replica:34805>:OUTPUT: Replica:3 order statement [slot,operationName,operationId,replicaId]:[3,put,2,3] is signed,appended to order Proof
+[2017-10-22 23:09:46,438] replica.Replica<Replica:34806>:OUTPUT: Replica:4 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',slice,2,4] is signed,appended to result Proof
+[2017-10-22 23:09:46,438] replica.Replica<Replica:34805>:OUTPUT: Replica:3 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,2,3] is signed,appended to result Proof
+[2017-10-22 23:09:46,439] client.Client<Client:34803>:INFO: Client:0 received result:OK from <Replica:34806>
+[2017-10-22 23:09:46,439] client.Client<Client:34803>:INFO: Client:0 is operation valid: True
+[2017-10-22 23:09:46,439] replica.Replica<Replica:34806>:OUTPUT: client result shuttle sent from tail to client:0
+[2017-10-22 23:09:46,440] replica.Replica<Replica:34805>:OUTPUT: forward shuttle sent to next replica
+[2017-10-22 23:09:46,441] client.Client<Client:34803>:INFO: Client:0 Result Proof is valid
+[2017-10-22 23:09:46,441] replica.Replica<Replica:34805>:INFO: Replica:3 received backward shuttle:1 for client:0
+[2017-10-22 23:09:46,441] client.Client<Client:34803>:INFO: Client:0 received VALID result
+[2017-10-22 23:09:46,441] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,441] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:0 in Replica:3
+[2017-10-22 23:09:46,442] client.Client<Client:34803>:INFO: client 0 workload output:{'movie': 'tar'}
+[2017-10-22 23:09:46,444] replica.Replica<Replica:34806>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 23:09:46,434] replica.Replica<Replica:34808>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:1
+[2017-10-22 23:09:46,445] replica.Replica<Replica:34805>:OUTPUT: Result Proof is valid for Replica:3
+[2017-10-22 23:09:46,445] replica.Replica<Replica:34805>:OUTPUT: Backward Shuttle:1 for client:0 passed validation at Replica:3
+[2017-10-22 23:09:46,445] replica.Replica<Replica:34806>:INFO: Replica:4 received forward shuttle:1 for client:1
+[2017-10-22 23:09:46,445] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'stars'} OperationName:slice OperationId:2]
+[2017-10-22 23:09:46,446] replica.Replica<Replica:34806>:OUTPUT: Replica:4 {client:{message_type>messagecount} is :{0: {<MessageTypes.SHUTTLE: 2>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1}}
+[2017-10-22 23:09:46,446] replica.Replica<Replica:34806>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the forward shuttle:1 client:1 in Replica:4
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34806>:OUTPUT: Forward Shuttle:1 for Client:1 passed validation at Replica:4
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34809>:INFO: Replica:2 received backward shuttle:1 for client:0
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34806>:INFO: [Replica:4 runningState:{'movie': 'stars'} OperationName:put OperationId:2 ]
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34806>:OUTPUT: result of operation is OK for Replica:4
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:0 in Replica:2
+[2017-10-22 23:09:46,447] replica.Replica<Replica:34806>:OUTPUT: Replica:4 order statement [slot,operationName,operationId,replicaId]:[3,put,2,4] is signed,appended to order Proof
+[2017-10-22 23:09:46,448] replica.Replica<Replica:34806>:OUTPUT: Replica:4 result statement [result_hash,operationName,operationId,replicaId]:[b'993c86df9aeaf07579b44943216571b94456b0228e65b6e09384701a7c4ab03f',put,2,4] is signed,appended to result Proof
+[2017-10-22 23:09:46,448] replica.Replica<Replica:34805>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,445] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'stars'} OperationName:get OperationId:1]
+[2017-10-22 23:09:46,448] replica.Replica<Replica:34806>:OUTPUT: client result shuttle sent from tail to client:1
+[2017-10-22 23:09:46,449] client.Client<Client:34802>:INFO: Client:1 received result:OK from <Replica:34806>
+[2017-10-22 23:09:46,449] client.Client<Client:34802>:INFO: Client:1 is operation valid: True
+[2017-10-22 23:09:46,449] replica.Replica<Replica:34806>:OUTPUT: backward shuttle generated from tail
+[2017-10-22 23:09:46,450] replica.Replica<Replica:34805>:INFO: Replica:3 received backward shuttle:1 for client:1
+[2017-10-22 23:09:46,450] replica.Replica<Replica:34805>:OUTPUT: Replica:3 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}}
+[2017-10-22 23:09:46,450] replica.Replica<Replica:34805>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:1 in Replica:3
+[2017-10-22 23:09:46,451] client.Client<Client:34802>:INFO: Client:1 Result Proof is valid
+[2017-10-22 23:09:46,451] client.Client<Client:34802>:INFO: Client:1 received VALID result
+[2017-10-22 23:09:46,451] replica.Replica<Replica:34808>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,451] client.Client<Client:34802>:INFO: client 1 workload output:{'movie': 'stars'}
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34807>:INFO: Replica:0 received backward shuttle:0 for client:1
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}, 1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,451] replica.Replica<Replica:34809>:OUTPUT: Result Proof is valid for Replica:2
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:0 client:1 in Replica:0
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34805>:OUTPUT: Result Proof is valid for Replica:3
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34805>:OUTPUT: Backward Shuttle:1 for client:1 passed validation at Replica:3
+[2017-10-22 23:09:46,452] bcr.Node_<Node_:a5001>:INFO: master receiveded done from all clients
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34805>:INFO: [Replica:3 runningState:{'movie': 'stars'} OperationName:put OperationId:2]
+[2017-10-22 23:09:46,453] client.Client<Client:34803>:INFO: client:0 received done from master
+[2017-10-22 23:09:46,453] replica.Replica<Replica:34805>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,454] client.Client<Client:34803>:INFO: client:0 sending done to olympus
+[2017-10-22 23:09:46,453] client.Client<Client:34802>:INFO: client:1 received done from master
+[2017-10-22 23:09:46,454] client.Client<Client:34802>:INFO: client:1 sending done to olympus
+[2017-10-22 23:09:46,454] client.Client<Client:34803>:INFO: Client 0 terminating
+[2017-10-22 23:09:46,454] client.Client<Client:34802>:INFO: Client 1 terminating
+[2017-10-22 23:09:46,452] replica.Replica<Replica:34809>:OUTPUT: Backward Shuttle:1 for client:0 passed validation at Replica:2
+[2017-10-22 23:09:46,455] olympus.Olympus<Olympus:34804>:OUTPUT: olympus received done from all clients
+[2017-10-22 23:09:46,455] bcr.Node_<Node_:a5001>:OUTPUT: master acknowledge done to clients
+[2017-10-22 23:09:46,458] olympus.Olympus<Olympus:34804>:OUTPUT: olympus sending  done to all replicas
+[2017-10-22 23:09:46,458] bcr.Node_<Node_:a5001>:OUTPUT: master waiting  done from  olympus
+[2017-10-22 23:09:46,462] replica.Replica<Replica:34807>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 23:09:46,462] replica.Replica<Replica:34807>:OUTPUT: Backward Shuttle:0 for client:1 passed validation at Replica:0
+[2017-10-22 23:09:46,463] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:get OperationId:1]
+[2017-10-22 23:09:46,465] replica.Replica<Replica:34807>:OUTPUT: backward shuttle reached head
+[2017-10-22 23:09:46,462] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'stars'} OperationName:slice OperationId:2]
+[2017-10-22 23:09:46,465] replica.Replica<Replica:34809>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,466] replica.Replica<Replica:34808>:INFO: Replica:1 received backward shuttle:1 for client:0
+[2017-10-22 23:09:46,466] replica.Replica<Replica:34809>:INFO: Replica:2 received backward shuttle:1 for client:1
+[2017-10-22 23:09:46,467] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,467] replica.Replica<Replica:34809>:OUTPUT: Replica:2 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}}
+[2017-10-22 23:09:46,467] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:0 in Replica:1
+[2017-10-22 23:09:46,467] replica.Replica<Replica:34809>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:1 in Replica:2
+[2017-10-22 23:09:46,468] replica.Replica<Replica:34808>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 23:09:46,468] replica.Replica<Replica:34809>:OUTPUT: Result Proof is valid for Replica:2
+[2017-10-22 23:09:46,469] replica.Replica<Replica:34808>:OUTPUT: Backward Shuttle:1 for client:0 passed validation at Replica:1
+[2017-10-22 23:09:46,469] replica.Replica<Replica:34809>:OUTPUT: Backward Shuttle:1 for client:1 passed validation at Replica:2
+[2017-10-22 23:09:46,469] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'stars'} OperationName:slice OperationId:2]
+[2017-10-22 23:09:46,469] replica.Replica<Replica:34809>:INFO: [Replica:2 runningState:{'movie': 'stars'} OperationName:put OperationId:2]
+[2017-10-22 23:09:46,470] replica.Replica<Replica:34808>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,470] replica.Replica<Replica:34809>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,471] replica.Replica<Replica:34807>:INFO: Replica:0 received backward shuttle:1 for client:0
+[2017-10-22 23:09:46,471] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 0}}
+[2017-10-22 23:09:46,471] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:0 in Replica:0
+[2017-10-22 23:09:46,471] replica.Replica<Replica:34808>:INFO: Replica:1 received backward shuttle:1 for client:1
+[2017-10-22 23:09:46,472] replica.Replica<Replica:34808>:OUTPUT: Replica:1 {client:{message_type>messagecount}:{0: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.SHUTTLE: 2>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}}
+[2017-10-22 23:09:46,472] replica.Replica<Replica:34808>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:1 in Replica:1
+[2017-10-22 23:09:46,473] replica.Replica<Replica:34807>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 23:09:46,473] replica.Replica<Replica:34807>:OUTPUT: Backward Shuttle:1 for client:0 passed validation at Replica:0
+[2017-10-22 23:09:46,473] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:slice OperationId:2]
+[2017-10-22 23:09:46,473] replica.Replica<Replica:34807>:OUTPUT: backward shuttle reached head
+[2017-10-22 23:09:46,474] replica.Replica<Replica:34808>:OUTPUT: Result Proof is valid for Replica:1
+[2017-10-22 23:09:46,474] replica.Replica<Replica:34808>:OUTPUT: Backward Shuttle:1 for client:1 passed validation at Replica:1
+[2017-10-22 23:09:46,474] replica.Replica<Replica:34808>:INFO: [Replica:1 runningState:{'movie': 'stars'} OperationName:put OperationId:2]
+[2017-10-22 23:09:46,474] replica.Replica<Replica:34808>:OUTPUT: backward shuttle sent to previous replica
+[2017-10-22 23:09:46,475] replica.Replica<Replica:34807>:INFO: Replica:0 received backward shuttle:1 for client:1
+[2017-10-22 23:09:46,475] replica.Replica<Replica:34807>:OUTPUT: Replica:0 {client:{message_type>messagecount}:{0: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}, 1: {<MessageTypes.DIRECT: 0>: 1, <MessageTypes.RESULT_SHUTTLE: 3>: 1}}
+[2017-10-22 23:09:46,475] replica.Replica<Replica:34807>:OUTPUT: Failure trigger is None , failure checks is  change_oper=False change_result=False drop_result=False change_privatekey=False for the backward shuttle:1 client:1 in Replica:0
+[2017-10-22 23:09:46,476] replica.Replica<Replica:34807>:OUTPUT: Result Proof is valid for Replica:0
+[2017-10-22 23:09:46,477] replica.Replica<Replica:34807>:OUTPUT: Backward Shuttle:1 for client:1 passed validation at Replica:0
+[2017-10-22 23:09:46,477] replica.Replica<Replica:34807>:INFO: [Replica:0 runningState:{'movie': 'stars'} OperationName:put OperationId:2]
+[2017-10-22 23:09:46,477] replica.Replica<Replica:34807>:OUTPUT: backward shuttle reached head

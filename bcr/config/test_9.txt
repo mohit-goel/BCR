@@ -1,0 +1,8 @@
+test_case_name = test_9
+t = 1
+num_client = 2
+client_timeout = 3000
+head_timeout = 3000
+nonhead_timeout = 3000
+workload[0] = put('movie','star')
+workload[1] = put('movie','stars')

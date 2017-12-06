@@ -1,0 +1,11 @@
+test_case_name = test_13
+t = 2
+num_client = 2
+client_timeout = 4000
+head_timeout = 4000
+nonhead_timeout = 4000
+workload[0] = put('movie','star'); slice('movie','1:4')
+workload[1] = get('movie'); put('movie','stars')
+failures[0,1] = shuttle(0,0), change_result()
+failures[0,2] = result_shuttle(0,0), change_result()
+
